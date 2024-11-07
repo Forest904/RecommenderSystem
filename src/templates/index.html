@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+    <title>Movie Recommender System</title>
+</head>
+<body>
+    <h1>Movie Recommender System</h1>
+    <form method="post">
+        <label for="title">Enter Movie Title:</label>
+        <input type="text" name="title" id="title" required>
+        <input type="submit" value="Get Recommendations">
+    </form>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+    {% if recommendations %}
+        <h2>Recommendations for "{{ content_title }}":</h2>
+        <ul>
+            {% for item in recommendations %}
+                <li>{{ item.Title }} ({{ item.content_type.capitalize() }})</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
