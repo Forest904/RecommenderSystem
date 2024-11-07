@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm import tqdm
 import time
 
-API_KEY = '82417ab9f1c7a6dd9b77d70a30713116'  # Replace with your TMDb API key
+API_KEY = ''  # Replace with your TMDb API key
 BASE_URL = 'https://api.themoviedb.org/3'
 
 # Initialize an empty list to store movie data
