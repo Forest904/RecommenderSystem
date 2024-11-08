@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 import pandas as pd
 import numpy as np
 from utils.recommendations_fetcher import get_recommendations, cross_content, title_type_df
-from utils.image_fetcher import get_movie_image
+from utils.images_fetcher import get_movie_image_url, get_book_cover_url
 
 #df_movies_images_url = pd.read_csv('src/repository/movie_images.csv')
 #df_books_images_url = pd.read_csv()
@@ -25,8 +25,16 @@ class RecommenderApp:
                 # Get additional information about recommendations
                 recommended_contents = cross_content[cross_content['Title'].isin(recommendations)]
 
-                # Get image URLs
-                recommended_contents['image_url'] = recommended_contents['Title'].apply(get_movie_image)
+                # Get image URLs based on content type
+                def get_image_url(row):
+                    if row['content_type'] == 'movie':
+                        return get_movie_image_url(row['Title'])
+                    elif row['content_type'] == 'book':
+                        return get_book_cover_url(row['Title'])
+                    else:
+                        return None
+
+                recommended_contents['image_url'] = recommended_contents.apply(get_image_url, axis=1)
                 
                 # Convert DataFrame to a list of dictionaries for easy templating
                 recommendations_list = recommended_contents.to_dict(orient='records')
