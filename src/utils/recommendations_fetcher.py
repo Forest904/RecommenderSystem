@@ -19,6 +19,8 @@ from sklearn.metrics import (
 df_books = pd.read_csv('src/datasets/books_rs/books.csv')
 df_movies = pd.read_csv('src/datasets/books_rs/movies.csv')
 
+
+
 # Add content_type
 df_books['content_type'] = 'book'
 df_movies['content_type'] = 'movie'
