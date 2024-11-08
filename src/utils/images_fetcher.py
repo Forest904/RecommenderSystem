@@ -3,7 +3,7 @@ import imdb
 import requests
 
 '''
-MOVIES DATASET BUILDER
+MOVIES DATASET IMAGES BUILDER 
 
 import pandas as pd
 from imdb import IMDb
@@ -52,7 +52,7 @@ movies = movies[['Title', 'Image Url']]
 movies.to_csv('movies_with_image_urls.csv', index=False)
 
 
-BOOKS DATASET BUILDER
+BOOKS DATASET COVER BUILDER
 
 from tqdm import tqdm
 import pandas as pd

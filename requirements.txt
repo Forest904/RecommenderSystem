@@ -1,9 +1,0 @@
-numpy
-scikit-learn
-pandas
-re
-nltk
-
-movies dataset: https://www.kaggle.com/datasets/balaka18/tmdb-top-10000-popular-movies-dataset
-
-books dataset: 
