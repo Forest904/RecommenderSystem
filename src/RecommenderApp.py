@@ -3,11 +3,6 @@ import pandas as pd
 import numpy as np
 from utils.note import get_recommendations, cross_content, title_type_df
 
-# Assuming all your existing code is already executed here, including:
-# - Data loading and preprocessing
-# - Definition of get_recommendations function
-# - Variables: cross_content, title_type_df, etc.
-
 class RecommenderApp:
     def __init__(self):
         self.app = Flask(__name__)
@@ -28,9 +23,6 @@ class RecommenderApp:
                 
                 # Convert DataFrame to a list of dictionaries for easy templating
                 recommendations_list = recommended_contents.to_dict(orient='records')
-                
-                # Optional: Print the keys to verify 'content_type' is present
-                # print(recommendations_list[0].keys())
                 
                 return render_template(
                     'index.html', 

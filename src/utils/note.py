@@ -16,8 +16,8 @@ from sklearn.metrics import (
 )
 
 # Load datasets
-df_books = pd.read_csv('C:/Users/lucap/Documents/Repositories/VSC/RecommenderSystem/src/datasets/books_rs/books.csv')
-df_movies = pd.read_csv('C:/Users/lucap/Documents/Repositories/VSC/RecommenderSystem/src/datasets/books_rs/movies.csv')
+df_books = pd.read_csv('src/datasets/books_rs/books.csv')
+df_movies = pd.read_csv('src/datasets/books_rs/movies.csv')
 
 # Add content_type
 df_books['content_type'] = 'book'
@@ -157,7 +157,7 @@ def print_content_type(titles):
         else:
             print(f"{title} (Content Type Not Found)")
 
-# Example usage
+"""
 content_title = "Despicable Me 4"
 recommendations = get_recommendations(content_title, k)
 
@@ -174,3 +174,5 @@ print(f"F1 Score: {f1:.4f}")
 print(f"Recall: {recall:.4f}")
 print(f"Mean Squared Error: {mse:.4f}")
 print(f"Root Mean Squared Error: {rmse:.4f}")
+
+"""

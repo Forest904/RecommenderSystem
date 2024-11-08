@@ -1,25 +1,150 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Movie Recommender System</title>
+    <!-- Bootstrap CSS -->
+    <link 
+        rel="stylesheet" 
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    >
+    <style>
+        body {
+            padding-top: 50px;
+        }
+        .search-bar {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .scrolling-wrapper {
+            overflow-x: auto;
+            display: flex;
+            flex-wrap: nowrap;
+            padding-bottom: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .card {
+            flex: 0 0 auto;
+            margin-right: 15px;
+            box-sizing: border-box;
+            min-width: 150px; /* Minimum width to prevent cards from becoming too small */
+        }
+        .card:last-child {
+            margin-right: 0;
+        }
+        .card img, .card svg {
+            height: 188px; /* Reduced height by 25% (from 250px to 188px) */
+            object-fit: cover;
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .card-text {
+            font-size: 0.9rem;
+        }
+        /* Media queries to adjust the number of cards shown based on screen size */
+        @media (min-width: 1200px) {
+            .card {
+                width: calc((100% - (15px * 9)) / 10); /* 10 cards, 9 margins */
+            }
+        }
+        @media (max-width: 1199px) and (min-width: 992px) {
+            .card {
+                width: calc((100% - (15px * 7)) / 8); /* 8 cards, 7 margins */
+            }
+        }
+        @media (max-width: 991px) and (min-width: 768px) {
+            .card {
+                width: calc((100% - (15px * 5)) / 6); /* 6 cards, 5 margins */
+            }
+        }
+        @media (max-width: 767px) {
+            .card {
+                width: calc((100% - (15px * 3)) / 4); /* 4 cards, 3 margins */
+            }
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .scrolling-wrapper {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;     /* Firefox */
+        }
+    </style>
 </head>
 <body>
-    <h1>Movie Recommender System</h1>
-    <form method="post">
-        <label for="title">Enter Movie Title:</label>
-        <input type="text" name="title" id="title" required>
-        <input type="submit" value="Get Recommendations">
-    </form>
-    {% if error %}
-        <p style="color:red;">{{ error }}</p>
-    {% endif %}
-    {% if recommendations %}
-        <h2>Recommendations for "{{ content_title }}":</h2>
-        <ul>
-            {% for item in recommendations %}
-                <li>{{ item.Title }} ({{ item.content_type.capitalize() }})</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    <div class="container-fluid">
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <h1 class="text-center mb-4">Movie Recommender System</h1>
+            <form method="post" class="form-inline justify-content-center">
+                <div class="input-group mb-3" style="width: 100%;">
+                    <input 
+                        type="text" 
+                        name="title" 
+                        id="title" 
+                        class="form-control form-control-lg" 
+                        placeholder="Enter Movie Title" 
+                        required
+                    >
+                    <div class="input-group-append">
+                        <button class="btn btn-primary btn-lg" type="submit">Get Recommendations</button>
+                    </div>
+                </div>
+            </form>
+            {% if error %}
+                <div class="alert alert-danger text-center" role="alert">
+                    {{ error }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Recommendations Scrollable Cards -->
+        {% if recommendations %}
+            <h2 class="text-center mt-5">Recommendations for {{ content_title }}:</h2>
+            <div class="scrolling-wrapper mt-4">
+                {% for item in recommendations %}
+                    <div class="card">
+                        <!-- Placeholder Image -->
+                        <svg 
+                            class="bd-placeholder-img card-img-top" 
+                            width="100%" 
+                            height="200" 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            preserveAspectRatio="xMidYMid slice" 
+                            focusable="false" 
+                            role="img"
+                        >
+                            <title>{{ item.Title }}</title>
+                            <rect width="100%" height="100%" fill="#868e96"></rect>
+                            <text x="50%" y="50%" fill="#dee2e6" dy=".3em">
+                                {{ item.content_type.capitalize() }}
+                            </text>
+                        </svg>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.Title }}</h5>
+                            <p class="card-text mb-1">
+                                Average Rating: {{ item['Vote Average'] }}
+                            </p>
+                            <strong class="card-text">
+                                 {{ item.content_type.capitalize() }}
+                            </strong>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script 
+        src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    ></script>
+    <script 
+        src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+    ></script>
+    <script 
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+    ></script>
 </body>
 </html>
