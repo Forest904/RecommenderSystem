@@ -1,9 +1,8 @@
 from flask import Flask, render_template, request
-import pandas as pd
-import numpy as np
 from utils.recommendations_fetcher import get_recommendations, cross_content, title_type_df
 from utils.images_fetcher import get_movie_image_url, get_book_cover_url
 
+# TO-DO Load the data instead of fetching it from api
 #df_movies_images_url = pd.read_csv('src/repository/movie_images.csv')
 #df_books_images_url = pd.read_csv()
 

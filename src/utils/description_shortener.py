@@ -2,6 +2,7 @@ import re
 from collections import Counter
 import pandas as pd
 
+#Script to shorten the description of the books in the dataset
 
 #Importing datasets
 #Books

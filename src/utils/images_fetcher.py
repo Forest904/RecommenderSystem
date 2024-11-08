@@ -1,10 +1,15 @@
 
+import imdb
+import requests
+
+'''
+MOVIES DATASET BUILDER
+
 import pandas as pd
 from imdb import IMDb
 from tqdm import tqdm
-import requests
-'''
-MOVIES DATASET BUILDER
+
+
 # Read the dataset from a CSV file
 movies = pd.read_csv('src/datasets/books_rs/movies.csv')
 
@@ -47,10 +52,10 @@ movies = movies[['Title', 'Image Url']]
 movies.to_csv('movies_with_image_urls.csv', index=False)
 
 
-
 BOOKS DATASET BUILDER
 
-
+from tqdm import tqdm
+import pandas as pd
 
 # Read the dataset from a CSV file
 books = pd.read_csv('src/datasets/books_rs/books.csv')
@@ -98,8 +103,8 @@ books.to_csv('books_with_image_urls.csv', index=False)
 
 
 '''
-import imdb
 
+# Function to get movie image URL for a given movie title
 def get_movie_image_url(title):
     # Create an instance of the IMDb class
     ia = imdb.IMDb()
