@@ -1,10 +1,13 @@
 from flask import Flask, render_template, request
-from utils.recommendations_fetcher import get_recommendations, cross_content, title_type_df
+from utils.recommendator import get_recommendations, initialize_recommender
 from utils.images_fetcher import get_movie_image_url, get_book_cover_url
 
 # TO-DO Load the data instead of fetching it from api
 #df_movies_images_url = pd.read_csv('src/repository/movie_images.csv')
 #df_books_images_url = pd.read_csv()
+
+# Initialize recommender data
+df_combined, tfidf_matrix = initialize_recommender()
 
 class RecommenderApp:
     def __init__(self):
@@ -15,14 +18,14 @@ class RecommenderApp:
         def index():
             if request.method == 'POST':
                 content_title = request.form['title']
-                recommendations = get_recommendations(content_title, k=10)
+                recommendations = get_recommendations(content_title, df_combined, tfidf_matrix, k=5)
                 
                 if not recommendations:
                     error_message = f"Content titled '{content_title}' not found."
                     return render_template('index.html', error=error_message)
                 
                 # Get additional information about recommendations
-                recommended_contents = cross_content[cross_content['Title'].isin(recommendations)]
+                recommended_contents = df_combined[df_combined['Title'].isin(recommendations)]
 
                 # Get image URLs based on content type
                 def get_image_url(row):
