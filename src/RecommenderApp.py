@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
-from utils.recommendator import get_recommendations, initialize_recommender
+from utils.recommendator import initialize_recommender
 from utils.images_fetcher import get_movie_image_url, get_book_cover_url
+from utils.balancer import get_balanced_recommendations
 
 # TO-DO Load the data instead of fetching it from api
 #df_movies_images_url = pd.read_csv('src/repository/movie_images.csv')
@@ -18,7 +19,7 @@ class RecommenderApp:
         def index():
             if request.method == 'POST':
                 content_title = request.form['title']
-                recommendations = get_recommendations(content_title, df_combined, tfidf_matrix, k=8)
+                recommendations = get_balanced_recommendations(content_title, 5)
                 
                 if not recommendations:
                     error_message = f"Content titled '{content_title}' not found."

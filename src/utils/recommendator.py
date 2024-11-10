@@ -179,7 +179,7 @@ Returns:
 def predict_ratings(cosine_sim_test_train, X_train, X_test, k=10):
     # Get the actual ratings from the training set
     train_ratings = X_train['Vote Average'].values
-    # Get indices of top-k similar items
+    # Sort in descending order and select the top-k indices
     top_k_indices = np.argsort(-cosine_sim_test_train, axis=1)[:, :k]
     # Get the similarities and ratings of top-k items
     top_k_similarities = np.take_along_axis(cosine_sim_test_train, top_k_indices, axis=1)
