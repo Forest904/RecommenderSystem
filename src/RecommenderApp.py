@@ -18,7 +18,7 @@ class RecommenderApp:
         def index():
             if request.method == 'POST':
                 content_title = request.form['title']
-                recommendations = get_recommendations(content_title, df_combined, tfidf_matrix, k=5)
+                recommendations = get_recommendations(content_title, df_combined, tfidf_matrix, k=8)
                 
                 if not recommendations:
                     error_message = f"Content titled '{content_title}' not found."
@@ -42,12 +42,12 @@ class RecommenderApp:
                 recommendations_list = recommended_contents.to_dict(orient='records')
                 
                 return render_template(
-                    'index.html', 
+                    'home.html', 
                     recommendations=recommendations_list, 
                     content_title=content_title
                 )
             else:
-                return render_template('index.html')
+                return render_template('home.html')
 
     def run(self):
         self.app.run(debug=True)

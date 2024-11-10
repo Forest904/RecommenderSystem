@@ -128,9 +128,6 @@ def get_movie_image_url(title):
     else:
         print(f"No image found for '{title}'.")
 
-import pandas as pd
-import requests
-from tqdm import tqdm
 
 # Function to get book cover image URL for a given book title
 def get_book_cover_url(title):
