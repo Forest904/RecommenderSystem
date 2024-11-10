@@ -10,6 +10,9 @@ from utils.balancer import get_balanced_recommendations
 # Initialize recommender data
 df_combined, tfidf_matrix = initialize_recommender()
 
+#Number of recommendations to show per type
+NUM_RECOMMENDATIONS = 3
+
 class RecommenderApp:
     def __init__(self):
         self.app = Flask(__name__)
@@ -19,7 +22,7 @@ class RecommenderApp:
         def index():
             if request.method == 'POST':
                 content_title = request.form['title']
-                recommendations = get_balanced_recommendations(content_title, 5)
+                recommendations = get_balanced_recommendations(content_title, NUM_RECOMMENDATIONS)
                 
                 if not recommendations:
                     error_message = f"Content titled '{content_title}' not found."
@@ -37,14 +40,17 @@ class RecommenderApp:
                     else:
                         return None
 
+                recommended_contents = recommended_contents.copy()
                 recommended_contents['image_url'] = recommended_contents.apply(get_image_url, axis=1)
                 
                 # Convert DataFrame to a list of dictionaries for easy templating
-                recommendations_list = recommended_contents.to_dict(orient='records')
+                movies_list = recommended_contents[recommended_contents['content_type'] == 'movie'].to_dict(orient='records')
+                books_list = recommended_contents[recommended_contents['content_type'] == 'book'].to_dict(orient='records')
                 
                 return render_template(
                     'home.html', 
-                    recommendations=recommendations_list, 
+                    movie_recommendations=movies_list, 
+                    book_recommendations=books_list,
                     content_title=content_title
                 )
             else:
