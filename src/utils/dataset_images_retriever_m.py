@@ -9,7 +9,7 @@ from tqdm import tqdm
 movies = pd.read_csv('src/datasets/books_rs/movies.csv')
 
 # Keep only the first 10 rows to test the system
-#movies = movies.head(10)
+movies = movies.head(10)
 
 # Initialize the IMDb object
 ia = IMDb()
@@ -24,10 +24,12 @@ def get_imdb_image_url(title):
             movie = search_results[0]
             # Update the movie object to get full details
             ia.update(movie)
-            # Check if 'cover url' is available
-            if 'cover url' in movie.keys():
-                image_url = movie['cover url']
-                return image_url
+            # Check if 'full-size cover url' is available
+            if 'full-size cover url' in movie.keys():
+                return movie['full-size cover url']
+            # Fallback to 'cover url' if 'full-size cover url' is not available
+            elif 'cover url' in movie.keys():
+                return movie['cover url']
             else:
                 return None
         else:
@@ -44,7 +46,7 @@ movies['Image Url'] = movies['Title'].progress_apply(get_imdb_image_url)
 movies = movies[['Title', 'Image Url']]
 
 # Save the updated dataset to a new CSV file
-movies.to_csv('movies_with_image_urls.csv', index=False)
+movies.to_csv('movies_with_image.csv', index=False)
 
 
 

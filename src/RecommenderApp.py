@@ -3,15 +3,11 @@ from utils.recommendator import initialize_recommender
 from utils.images_fetcher import get_movie_image_url, get_book_cover_url
 from utils.balancer import get_balanced_recommendations
 
-# TO-DO Load the data instead of fetching it from api
-#df_movies_images_url = pd.read_csv('src/repository/movie_images.csv')
-#df_books_images_url = pd.read_csv()
-
 # Initialize recommender data
 df_combined, tfidf_matrix = initialize_recommender()
 
 #Number of recommendations to show per type
-NUM_RECOMMENDATIONS = 3
+NUM_RECOMMENDATIONS = 6
 
 class RecommenderApp:
     def __init__(self):
