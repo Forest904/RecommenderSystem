@@ -1,33 +1,14 @@
+#BOOKS DATASET COVER BUILDER
 
-import imdb
+from tqdm import tqdm
+import pandas as pd
 import requests
 
+# Read the dataset from a CSV file
+books = pd.read_csv('src/datasets/books_rs/books.csv')
 
-
-# Function to get movie image URL for a given movie title
-def get_movie_image_url(title):
-    # Create an instance of the IMDb class
-    ia = imdb.IMDb()
-
-    # Search for the movie by title
-    search_results = ia.search_movie(title)
-
-    if not search_results:
-        print("Movie not found!")
-        return
-
-    # Fetch the first movie in the search results
-    movie = search_results[0]
-    ia.update(movie)
-
-    # Get the movie's image URL
-    image_url = movie.get('full-size cover url')
-
-    if image_url:
-        return image_url
-    else:
-        print(f"No image found for '{title}'.")
-
+# Keep only the first 10 rows to test the system
+#books = books.head(10)
 
 # Function to get book cover image URL for a given book title
 def get_book_cover_url(title):
@@ -57,3 +38,12 @@ def get_book_cover_url(title):
         print(f"Error fetching cover image for '{title}': {e}")
         return None
 
+# Apply the function to the 'Title' column with a progress bar
+tqdm.pandas(desc="Fetching Book Cover Images")
+books['Image Url'] = books['Title'].progress_apply(get_book_cover_url)
+
+# Keep only the 'Title' and 'Image Url' columns
+books = books[['Title', 'Image Url']]
+
+# Save the updated dataset to a new CSV file
+books.to_csv('books_with_image_urls.csv', index=False)
