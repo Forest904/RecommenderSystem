@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request
 from utils.recommendator import initialize_recommender
-from utils.images_fetcher import get_movie_image_url, get_book_cover_url
+from utils.contents_fetcher import get_movie_image_url, get_book_cover_url, get_genre, get_author, get_plot
 from utils.balancer import get_balanced_recommendations
+import pandas as pd
 
 # Initialize recommender data
 df_combined, tfidf_matrix = initialize_recommender()
@@ -36,8 +37,23 @@ class RecommenderApp:
                     else:
                         return None
 
+                #Add a get author function for both books and movies
+                def get_a(title):
+                    return get_author(title, df_combined)
+
+                #Add a get genre function for both books and movies
+                def get_g(title):
+                    return get_genre(title)
+                
+                #Add a get plot function for both books and movies
+                def get_p(title):
+                    return get_plot(title)
+
                 recommended_contents = recommended_contents.copy()
                 recommended_contents['image_url'] = recommended_contents.apply(get_image_url, axis=1)
+                recommended_contents['author'] = recommended_contents['Title'].apply(get_a)
+                recommended_contents['genre'] = recommended_contents['Title'].apply(get_g)
+                recommended_contents['plot'] = recommended_contents['Title'].apply(get_p)
                 
                 # Convert DataFrame to a list of dictionaries for easy templating
                 movies_list = recommended_contents[recommended_contents['content_type'] == 'movie'].to_dict(orient='records')

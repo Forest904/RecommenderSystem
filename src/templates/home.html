@@ -14,6 +14,20 @@
         .card img {
             max-height: 250px;
             object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+
+        .card .card-body {
+            display: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover img {
+            opacity: 0.3;
+        }
+
+        .card:hover .card-body {
+            display: block;
         }
     </style>
 </head>
@@ -71,12 +85,11 @@
                                 {% endif %}
                                 <div class="card-body">
                                     <h5 class="card-title">{{ movie['Title'] }}</h5>
-                                    <p class="card-text mb-1">
-                                        Average Rating: {{ movie['Vote Average'] }}
-                                    </p>
-                                    <strong class="card-text">
-                                        Movie
-                                    </strong>
+                                    <p class="card-text mb-1">Average Rating: {{ movie['Vote Average'] }}</p>
+                                    <p class="card-text mb-1">Author: {{ movie['Author'] }}</p>
+                                    <p class="card-text mb-1">Genre: {{ movie['Genre'] }}</p>
+                                    <p class="card-text mb-1">Plot: {{ movie['Plot'] }}</p>
+                                    <strong class="card-text">Movie</strong>
                                 </div>
                             </div>
                         </div>
@@ -109,12 +122,11 @@
                                 {% endif %}
                                 <div class="card-body">
                                     <h5 class="card-title">{{ book['Title'] }}</h5>
-                                    <p class="card-text mb-1">
-                                        Average Rating: {{ book['Vote Average'] }}
-                                    </p>
-                                    <strong class="card-text">
-                                        Book
-                                    </strong>
+                                    <p class="card-text mb-1">Average Rating: {{ book['Vote Average'] }}</p>
+                                    <p class="card-text mb-1">Author: {{ book['Author'] }}</p>
+                                    <p class="card-text mb-1">Genre: {{ book['Genre'] }}</p>
+                                    <p class="card-text mb-1">Plot: {{ book['Plot'] }}</p>
+                                    <strong class="card-text">Book</strong>
                                 </div>
                             </div>
                         </div>
