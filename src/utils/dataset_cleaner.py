@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load your dataset into a DataFrame
-df = pd.read_csv('src/utils/movies_with_image_urls.csv')  # Replace with your data source
+df = pd.read_csv('src/movies_with_image.csv')  # Replace with your data source
 
 # Dictionary to keep track of deletions per attribute
 deletions = {}

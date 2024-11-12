@@ -2,10 +2,6 @@ import imdb
 import requests
 import pandas as pd
 
-df_movies = pd.read_csv('src/datasets/books_rs/movies.csv')
-df_books = pd.read_csv('src/datasets/books_rs/books.csv')
-
-
 
 # Function to get movie image URL for a given movie title
 def get_movie_image_url(title):
@@ -77,41 +73,10 @@ def get_book_cover_url(title):
         return None
 
 
-
-# Function to get author for a given book or movie title
-def get_author(title, df_combined):
-    # Check if the title is in the books dataset
-    content_entry = df_combined[df_combined['Title'].str.lower() == title.lower()]
-    if not content_entry.empty and 'Author' in content_entry.columns:
-        author = content_entry['Author'].iloc[0]
-        if pd.notna(author):
-            return author
-            
-    # If the title is not found in either dataset, return None
-    return None
-
-# Function to get the genre for a given book or movie title
-def get_genre(title):
-    # Check if the title is in the books dataset
-    book_entry = df_books[df_books['Title'].str.lower() == title.lower()]
-    if not book_entry.empty and 'Genre' in book_entry.columns:
-        genre = book_entry['Genre'].iloc[0]
-        if pd.notna(genre):
-            return genre
-            
-    # Check if the title is in the movies dataset
-    movie_entry = df_movies[df_movies['Title'].str.lower() == title.lower()]
-    if not movie_entry.empty and 'Genre' in movie_entry.columns:
-        genre = movie_entry['Genre'].iloc[0]
-        if pd.notna(genre):
-            return genre
-            
-    # If the title is not found in either dataset, return None
-    return None
-
 # Function to get the plot for a given book or movie title
 def get_plot(title):
     # Check if the title is in the books dataset
+    df_books = pd.read_csv('src/datasets/books_rs/books.csv')
     book_entry = df_books[df_books['Title'].str.lower() == title.lower()]
     if not book_entry.empty and 'Plot' in book_entry.columns:
         plot = book_entry['Plot'].iloc[0]
@@ -119,6 +84,7 @@ def get_plot(title):
             return plot
             
     # Check if the title is in the movies dataset
+    df_movies = pd.read_csv('src/datasets/books_rs/movies.csv')
     movie_entry = df_movies[df_movies['Title'].str.lower() == title.lower()]
     if not movie_entry.empty and 'Plot' in movie_entry.columns:
         plot = movie_entry['Plot'].iloc[0]
