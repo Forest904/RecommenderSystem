@@ -9,7 +9,7 @@ from tqdm import tqdm
 movies = pd.read_csv('src/datasets/books_rs/movies.csv')
 
 # Keep only the first 10 rows to test the system
-movies = movies.head(10)
+#movies = movies.head(10)
 
 # Initialize the IMDb object
 ia = IMDb()
