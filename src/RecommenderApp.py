@@ -5,7 +5,7 @@ from utils.balancer import get_balanced_recommendations
 import pandas as pd
 
 # Initialize recommender data
-df_combined, tfidf_matrix = initialize_recommender()
+df, tfidf_matrix, vectorizer = initialize_recommender()
 
 #Number of recommendations to show per type
 NUM_RECOMMENDATIONS = 6
@@ -26,13 +26,13 @@ class RecommenderApp:
                     return render_template('index.html', error=error_message)
                 
                 # Get additional information about recommendations
-                recommended_contents = df_combined[df_combined['Title'].isin(recommendations)]
+                recommended_contents = df[df['Title'].isin(recommendations)]
 
                 # Get image URLs based on content type
                 def get_image_url(row):
-                    if row['content_type'] == 'movie':
+                    if row['Type'] == 'movie':
                         return get_movie_image_url(row['Title'])
-                    elif row['content_type'] == 'book':
+                    elif row['Type'] == 'book':
                         return get_book_cover_url(row['Title'])
                     else:
                         return None
@@ -46,8 +46,8 @@ class RecommenderApp:
                 recommended_contents['plot'] = recommended_contents['Title'].apply(get_p)
                 
                 # Convert DataFrame to a list of dictionaries for easy templating
-                movies_list = recommended_contents[recommended_contents['content_type'] == 'movie'].to_dict(orient='records')
-                books_list = recommended_contents[recommended_contents['content_type'] == 'book'].to_dict(orient='records')
+                movies_list = recommended_contents[recommended_contents['Type'] == 'movie'].to_dict(orient='records')
+                books_list = recommended_contents[recommended_contents['Type'] == 'book'].to_dict(orient='records')
                 
                 return render_template(
                     'home.html', 

@@ -3,16 +3,16 @@ import pandas as pd
 from recommendator import run_recommendation_and_evaluate, initialize_recommender, split_train_test, compute_similarity
 
 # Initialize the recommender system
-df_combined, tfidf_matrix = initialize_recommender()
+df, tfidf_matrix, vectorizer = initialize_recommender()
 
 # Split the data into training and testing sets
-X_train, X_test = split_train_test(df_combined)
+X_train, X_test = split_train_test(df)
 
 # Compute cosine similarity between test and train sets
-cosine_sim_test_train, _ = compute_similarity(df_combined, X_train, X_test)
+cosine_sim_test_train, _ = compute_similarity(df, X_train, X_test)
 
 # Extract the titles
-titles = df_combined['Title'].unique()
+titles = df['Title'].unique()
 
 # Randomly select titles
 num_titles = 100  # Number of titles to sample
@@ -21,7 +21,7 @@ sampled_titles = random.sample(list(titles), num_titles)
 # Evaluate metrics for each title
 metrics_list = []
 for title in sampled_titles:
-    metrics = run_recommendation_and_evaluate(title, df_combined, tfidf_matrix, X_train, X_test, cosine_sim_test_train)
+    metrics = run_recommendation_and_evaluate(title, df, tfidf_matrix, X_train, X_test, cosine_sim_test_train)
     metrics_list.append(metrics)
 
 # Calculate the average of metrics
