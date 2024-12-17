@@ -1,57 +1,56 @@
 from flask import Flask, render_template, request
-from utils.recommendator import initialize_recommender
+from utils.recommendator import initialize_recommender, get_balanced_recommendations
 from utils.contents_fetcher import get_movie_image_url, get_book_cover_url, get_plot
-from utils.balancer import get_balanced_recommendations
-import pandas as pd
 
-# Initialize recommender data
-df, tfidf_matrix, vectorizer = initialize_recommender()
 
 #Number of recommendations to show per type
 NUM_RECOMMENDATIONS = 6
+
+# Initialize recommender data only once
+df, embeddings = initialize_recommender()
 
 class RecommenderApp:
     def __init__(self):
         self.app = Flask(__name__)
 
-        # Define the index route
         @self.app.route('/', methods=['GET', 'POST'])
         def index():
             if request.method == 'POST':
                 content_title = request.form['title']
-                recommendations = get_balanced_recommendations(content_title, NUM_RECOMMENDATIONS)
+                
+                # Pass preloaded df and embeddings
+                recommendations = get_balanced_recommendations(
+                    content_title, NUM_RECOMMENDATIONS, df, embeddings
+                )
                 
                 if not recommendations:
                     error_message = f"Content titled '{content_title}' not found."
                     return render_template('index.html', error=error_message)
-                
-                # Get additional information about recommendations
-                recommended_contents = df[df['Title'].isin(recommendations)]
 
-                # Get image URLs based on content type
+                # Prepare additional information
+                recommended_contents = df[df['Title'].isin(recommendations)].copy()
+                
                 def get_image_url(row):
                     if row['Type'] == 'movie':
                         return get_movie_image_url(row['Title'])
                     elif row['Type'] == 'book':
                         return get_book_cover_url(row['Title'])
-                    else:
-                        return None
-                
-                #Add a get plot function for both books and movies
+                    return None
+
                 def get_p(title):
                     return get_plot(title)
 
-                recommended_contents = recommended_contents.copy()
+                # Add image URLs and plots
                 recommended_contents['image_url'] = recommended_contents.apply(get_image_url, axis=1)
                 recommended_contents['plot'] = recommended_contents['Title'].apply(get_p)
-                
-                # Convert DataFrame to a list of dictionaries for easy templating
+
+                # Convert to dictionaries for templates
                 movies_list = recommended_contents[recommended_contents['Type'] == 'movie'].to_dict(orient='records')
                 books_list = recommended_contents[recommended_contents['Type'] == 'book'].to_dict(orient='records')
                 
                 return render_template(
-                    'home.html', 
-                    movie_recommendations=movies_list, 
+                    'home.html',
+                    movie_recommendations=movies_list,
                     book_recommendations=books_list,
                     content_title=content_title
                 )

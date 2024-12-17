@@ -2,15 +2,18 @@ import pandas as pd
 import re
 import numpy as np
 import logging
+import os
+import pickle
 
 import nltk
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
 from nltk import pos_tag
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, precision_score, recall_score, f1_score, accuracy_score
+
+from sentence_transformers import SentenceTransformer
 
 # Ensure NLTK data is downloaded
 try:
@@ -25,12 +28,16 @@ except LookupError:
     nltk.download('wordnet')
 
 try:
-    nltk.data.find('taggers/averaged_perceptron_tagger_eng')
+    nltk.data.find('taggers/averaged_perceptron_tagger')
 except LookupError:
-    nltk.download('averaged_perceptron_tagger_eng')
+    nltk.download('averaged_perceptron_tagger')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+CACHE_DIR = 'cache'
+if not os.path.exists(CACHE_DIR):
+    os.makedirs(CACHE_DIR)
 
 def load_datasets():
     # Load and combine books and movies data
@@ -62,11 +69,11 @@ def preprocess_content_data(df_combined, stop_words, lemmatizer, word_pattern):
     df_combined['tags'] = df_combined['tags'].apply(lambda x: preprocess_text(x, stop_words, lemmatizer, word_pattern))
     return df_combined
 
-def compute_similarity(df_combined, X_train, X_test, tfidf_vectorizer, tfidf_matrix):
-    # Compute cosine similarity using provided tfidf_matrix
-    train_tfidf = tfidf_matrix[X_train.index]
-    test_tfidf = tfidf_matrix[X_test.index]
-    cosine_sim = cosine_similarity(test_tfidf, train_tfidf)
+def compute_similarity(X_train, X_test, embeddings):
+    # Compute cosine similarity using embeddings
+    train_emb = embeddings[X_train.index]
+    test_emb = embeddings[X_test.index]
+    cosine_sim = cosine_similarity(test_emb, train_emb)
     return cosine_sim
 
 def predict_ratings(cosine_sim, X_train, X_test, k=10):
@@ -106,21 +113,21 @@ def evaluate_model(actual, predicted, threshold=5):
     mse, rmse = evaluate_regression(actual, predicted)
     return acc, prec, recall, f1, mse, rmse
 
-def get_recommendations(content_title, df_combined, tfidf_matrix, k=10):
+def get_recommendations(content_title, df_combined, embeddings, k=10):
     # Recommend top-k similar items
     try:
         idx = df_combined[df_combined['Title'] == content_title].index[0]
     except IndexError:
         logger.warning(f"'{content_title}' not found.")
         return []
-    scores = cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten()
+    scores = cosine_similarity(embeddings[idx].reshape(1, -1), embeddings).flatten()
     sorted_idx = np.argsort(-scores)
     top_idx = sorted_idx[sorted_idx != idx][:k]
     return df_combined.iloc[top_idx][['Title', 'Type']].to_dict(orient='records')
 
-def run_recommendation_and_evaluate(content_title, df_combined, tfidf_matrix, X_train, X_test, cosine_sim, threshold=5):
+def run_recommendation_and_evaluate(content_title, df_combined, embeddings, X_train, X_test, cosine_sim, threshold=5):
     # Get recommendations, predict ratings, evaluate performance
-    recs = get_recommendations(content_title, df_combined, tfidf_matrix)
+    recs = get_recommendations(content_title, df_combined, embeddings)
     for r in recs:
         logger.info(f"{r['Title']} ({r['Type'].capitalize()})")
     actual, predicted = predict_ratings(cosine_sim, X_train, X_test)
@@ -135,18 +142,60 @@ def run_recommendation_and_evaluate(content_title, df_combined, tfidf_matrix, X_
     return [acc, prec, recall, f1, mse, rmse]
 
 def initialize_recommender():
-    # Initialize datasets, preprocess, and prepare TF-IDF
-    df = load_datasets()
-    lemmatizer = WordNetLemmatizer()
-    pattern = re.compile(r'\b\w+\b')
-    df = preprocess_content_data(df, stop_words, lemmatizer, pattern)
-    vectorizer = TfidfVectorizer(analyzer='word', ngram_range=(1, 3))
-    tfidf_matrix = vectorizer.fit_transform(df['tags'])
-    return df, tfidf_matrix, vectorizer
+    """
+    Initialize datasets, preprocess, and prepare embeddings from BERT model.
+    Use caching to load from disk if available.
+    """
+    df_cache_path = os.path.join(CACHE_DIR, 'df_preprocessed.pkl')
+    emb_cache_path = os.path.join(CACHE_DIR, 'embeddings.npy')
+
+    if os.path.exists(df_cache_path) and os.path.exists(emb_cache_path):
+        # Load cached data
+        logger.info("Loading preprocessed DataFrame and embeddings from cache.")
+        with open(df_cache_path, 'rb') as f:
+            df = pickle.load(f)
+        embeddings = np.load(emb_cache_path)
+    else:
+        # Compute and save
+        logger.info("Cache not found. Loading and preprocessing data.")
+        df = load_datasets()
+        lemmatizer = WordNetLemmatizer()
+        pattern = re.compile(r'\b\w+\b')
+        df = preprocess_content_data(df, stop_words, lemmatizer, pattern)
+
+        logger.info("Generating embeddings with SentenceTransformer.")
+        model = SentenceTransformer('all-MiniLM-L6-v2')  # Modify model if desired
+        embeddings = model.encode(df['tags'].tolist(), show_progress_bar=True)
+
+        # Save to cache
+        with open(df_cache_path, 'wb') as f:
+            pickle.dump(df, f)
+        np.save(emb_cache_path, embeddings)
+
+    return df, embeddings
+
+def balance_recommendations(recommendations, min_recommendations):
+    # Separate recommendations into books and movies
+    books = [rec for rec in recommendations if rec.get('Type') == 'book']
+    movies = [rec for rec in recommendations if rec.get('Type') == 'movie']
+    
+    # Determine the balanced minimum length
+    min_length = min(len(books), len(movies), min_recommendations)
+    
+    # Combine an equal number of books and movies
+    balanced_recommendations = books[:min_length] + movies[:min_length]
+    return [rec['Title'] for rec in balanced_recommendations]
+
+def get_balanced_recommendations(content_title, min_recommendations, df, embeddings):
+    # Get recommendations as a list of dictionaries
+    recommendations = get_recommendations(content_title, df, embeddings, min_recommendations * 200)
+    
+    # Balance the recommendations
+    return balance_recommendations(recommendations, min_recommendations)
 
 if __name__ == "__main__":
-    df_combined, tfidf_matrix, tfidf_vectorizer = initialize_recommender()
+    df_combined, embeddings = initialize_recommender()
     X_train, X_test = train_test_split(df_combined, test_size=0.2, random_state=42)
-    cosine_sim_test_train = compute_similarity(df_combined, X_train, X_test, tfidf_vectorizer, tfidf_matrix)
+    cosine_sim_test_train = compute_similarity(X_train, X_test, embeddings)
     content_title = "Despicable Me 4"
-    run_recommendation_and_evaluate(content_title, df_combined, tfidf_matrix, X_train, X_test, cosine_sim_test_train, threshold=5)
+    run_recommendation_and_evaluate(content_title, df_combined, embeddings, X_train, X_test, cosine_sim_test_train, threshold=5)
