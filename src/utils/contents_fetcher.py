@@ -1,95 +1,125 @@
-import imdb
-import requests
+import os
 import pandas as pd
+import aiohttp
+import asyncio
 
+# Define dataset paths
+MOVIE_DATASET_PATH = 'src/datasets/books_rs/movies_with_image_urls.csv'
+BOOK_DATASET_PATH = 'src/datasets/books_rs/books_with_image_urls.csv'
 
-# Function to get movie image URL for a given movie title
-def get_movie_image_url(title):
-    # Check if the URL is already in the dataset
-    #Check the data before fetching it from api
-    df_movies_images_url = pd.read_csv('src/datasets/books_rs/movies_with_image_urls.csv')
-    movie_entry = df_movies_images_url[df_movies_images_url['Title'].str.lower() == title.lower()]
-    if not movie_entry.empty and 'Image Url' in movie_entry.columns:
-        image_url = movie_entry['Image Url'].iloc[0]
-        if pd.notna(image_url):
-            return image_url
-    
-    # Create an instance of the IMDb class
-    ia = imdb.IMDb()
+# API URLs
+TMDB_API_BASE_URL = "https://api.themoviedb.org/3"
+BOOK_API_URL = "http://openlibrary.org/search.json"
 
-    # Search for the movie by title
-    search_results = ia.search_movie(title)
+# API Keys
+TMDB_API_KEY = os.getenv("eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4MjQxN2FiOWYxYzdhNmRkOWI3N2Q3MGEzMDcxMzExNiIsIm5iZiI6MTczMDkxMzQxMi4yMDQsInN1YiI6IjY3MmJhNDg0MjZiNjA1YmMxOWU1YWU0MyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.BQVyuNeQLC_EbQS4KRZ5neZJBGvHTNuWW1MO756VONw")  # Set this in your environment
 
-    if not search_results:
-        print("Movie not found!")
-        return
+# Load datasets into memory for faster access
+def load_datasets():
+    movies_df = pd.read_csv(MOVIE_DATASET_PATH) if os.path.exists(MOVIE_DATASET_PATH) else pd.DataFrame()
+    books_df = pd.read_csv(BOOK_DATASET_PATH) if os.path.exists(BOOK_DATASET_PATH) else pd.DataFrame()
+    return movies_df, books_df
 
-    # Fetch the first movie in the search results
-    movie = search_results[0]
-    ia.update(movie)
+movies_df, books_df = load_datasets()
 
-    # Get the movie's image URL
-    image_url = movie.get('full-size cover url')
-
-    if image_url:
-        return image_url
-    else:
-        print(f"No image found for '{title}'.")
-
-# Function to get book cover image URL for a given book title
-def get_book_cover_url(title):
-    # Check if the URL is already in the dataset
-    df_books_images_url = pd.read_csv('src/datasets/books_rs/books_with_image_urls.csv')
-    book_entry = df_books_images_url[df_books_images_url['Title'].str.lower() == title.lower()]
-    if not book_entry.empty and 'Image Url' in book_entry.columns:
-        image_url = book_entry['Image Url'].iloc[0]
-        if pd.notna(image_url):
-            return image_url
-
+async def fetch_data(session, url, params):
+    """Fetch data asynchronously from an API."""
     try:
-        # Search for the book by title using Open Library Search API
-        params = {'title': title}
-        response = requests.get('http://openlibrary.org/search.json', params=params)
-        if response.status_code == 200:
-            data = response.json()
-            if data['docs']:
-                # Assume the first result is the correct one
-                book = data['docs'][0]
-                # Get the cover id if available
-                if 'cover_i' in book:
-                    cover_id = book['cover_i']
-                    # Construct the cover image URL
-                    image_url = f'http://covers.openlibrary.org/b/id/{cover_id}-L.jpg'  # '-L' for large size
-                    return image_url
-                else:
-                    return None
+        async with session.get(url, params=params) as response:
+            if response.status == 200:
+                return await response.json()
             else:
+                print(f"Error {response.status} for URL: {url} with params: {params}")
                 return None
-        else:
-            print(f"Error fetching data for '{title}': Status code {response.status_code}")
-            return None
     except Exception as e:
-        print(f"Error fetching cover image for '{title}': {e}")
+        print(f"Exception during fetch: {e}")
         return None
 
-
-# Function to get the plot for a given book or movie title
-def get_plot(title):
-    # Check if the title is in the books dataset
-    df_books = pd.read_csv('src/datasets/books_rs/books.csv')
-    book_entry = df_books[df_books['Title'].str.lower() == title.lower()]
-    if not book_entry.empty and 'Plot' in book_entry.columns:
-        plot = book_entry['Plot'].iloc[0]
-        if pd.notna(plot):
-            return plot
-            
-    # Check if the title is in the movies dataset
-    df_movies = pd.read_csv('src/datasets/books_rs/movies.csv')
-    movie_entry = df_movies[df_movies['Title'].str.lower() == title.lower()]
-    if not movie_entry.empty and 'Plot' in movie_entry.columns:
-        plot = movie_entry['Plot'].iloc[0]
-        if pd.notna(plot):
-            return plot
-            
-    # If the title is not found in either dataset, return None
+def get_content_from_dataset(title, dataset):
+    """Retrieve content data from a dataset."""
+    entry = dataset[dataset['Title'].str.lower() == title.lower()]
+    if not entry.empty and 'Image Url' in entry.columns:
+        return entry.iloc[0]['Image Url']
     return None
+
+async def fetch_movie_url(session, title):
+    """Fetch movie image URL using TMDB API."""
+    search_url = f"{TMDB_API_BASE_URL}/search/movie"
+    params = {"query": title, "api_key": TMDB_API_KEY}
+    search_response = await fetch_data(session, search_url, params)
+
+    if search_response and search_response.get('results'):
+        movie_id = search_response['results'][0]['id']
+        movie_url = f"{TMDB_API_BASE_URL}/movie/{movie_id}"
+        details_params = {"api_key": TMDB_API_KEY, "append_to_response": "images"}
+        details_response = await fetch_data(session, movie_url, details_params)
+
+        if details_response and 'images' in details_response:
+            posters = details_response['images'].get('posters', [])
+            if posters:
+                file_path = posters[0].get('file_path', '')
+                return f"https://image.tmdb.org/t/p/original{file_path}"
+    return None
+
+async def fetch_book_url(session, title):
+    """Fetch book cover image URL using OpenLibrary API."""
+    params = {"title": title}
+    response = await fetch_data(session, BOOK_API_URL, params)
+    if response and 'docs' in response and response['docs']:
+        book = response['docs'][0]  # Assume the first result is the correct one
+        if 'cover_i' in book:
+            return f"http://covers.openlibrary.org/b/id/{book['cover_i']}-L.jpg"
+    return None
+
+async def get_content_url(title, content_type):
+    """Retrieve content URL either from the dataset or via API."""
+    global movies_df, books_df
+
+    if content_type == 'movie':
+        url = get_content_from_dataset(title, movies_df)
+        if url:
+            return url
+
+        # Fetch via API
+        async with aiohttp.ClientSession() as session:
+            url = await fetch_movie_url(session, title)
+            if url:
+                # Update dataset
+                new_entry = pd.DataFrame([{"Title": title, "Image Url": url}])
+                movies_df = pd.concat([movies_df, new_entry], ignore_index=True)
+                movies_df.to_csv(MOVIE_DATASET_PATH, index=False)
+                return url
+
+    elif content_type == 'book':
+        url = get_content_from_dataset(title, books_df)
+        if url:
+            return url
+
+        # Fetch via API
+        async with aiohttp.ClientSession() as session:
+            url = await fetch_book_url(session, title)
+            if url:
+                # Update dataset
+                new_entry = pd.DataFrame([{"Title": title, "Image Url": url}])
+                books_df = pd.concat([books_df, new_entry], ignore_index=True)
+                books_df.to_csv(BOOK_DATASET_PATH, index=False)
+                return url
+
+    return None
+
+async def get_batch_content_urls(titles, content_type):
+    """Fetch content URLs for a batch of titles concurrently."""
+    tasks = [get_content_url(title, content_type) for title in titles]
+    return await asyncio.gather(*tasks)
+
+# Example usage
+def fetch_urls_example():
+    titles = ["Inception", "The Hobbit", "The Avengers"]  # Example titles
+    content_type = "movie"  # or "book"
+
+    urls = asyncio.run(get_batch_content_urls(titles, content_type))
+    for title, url in zip(titles, urls):
+        print(f"{title}: {url}")
+
+if __name__ == "__main__":
+    fetch_urls_example()
