@@ -1,7 +1,7 @@
+// src/App.js
 import React from "react";
 import { Container, AppBar, Typography, TextField, Grid, Card, CardContent, CardMedia, Button } from "@mui/material";
 import { useState } from "react";
-
 
 const App = () => {
   const [query, setQuery] = useState("");
