@@ -1,8 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from utils.recommendator import initialize_recommender, get_balanced_recommendations
-from utils.contents_fetcher import get_content_url
-import asyncio
+from utils.contents_fetcher import get_content_url, get_batch_content_urls
 import logging
 import pandas as pd
 
@@ -35,19 +34,11 @@ def get_recommendations():
 
         recommended_contents = df[df['Title'].isin(recommendations)].copy()
 
-        async def enrich_recommendations():
-            tasks = [
-                get_content_url(row['Title'], row['Type'])
-                for _, row in recommended_contents.iterrows()
-            ]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            # Replace exceptions with None for image_url
-            results = [r if not isinstance(r, Exception) else None for r in results]
-            return results
-
-        # Enrich the recommendations with image URLs
-        results = asyncio.run(enrich_recommendations())
-        recommended_contents['image_url'] = results
+        # Enrich the recommendations with image URLs synchronously
+        recommended_contents['image_url'] = [
+            get_content_url(row['Title'], row['Type'])
+            for _, row in recommended_contents.iterrows()
+        ]
 
         # Convert NaNs to None so JSON is valid
         recommended_contents = recommended_contents.where(pd.notnull(recommended_contents), None)
