@@ -1,77 +1,67 @@
-// src/App.js
-import React from "react";
-import { Container, AppBar, Typography, TextField, Grid, Card, CardContent, CardMedia, Button } from "@mui/material";
-import { useState } from "react";
+import React, { useState } from 'react';
+import axios from 'axios';
 
 const App = () => {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]); // Placeholder for fetched results
+  const [title, setTitle] = useState('');
+  const [recommendations, setRecommendations] = useState([]);
+  const [error, setError] = useState('');
 
-  const handleSearch = () => {
-    // Mock function: Replace with API call
-    setResults([
-      {
-        type: "movie",
-        title: "The Matrix",
-        description: "A hacker discovers the shocking truth about his world.",
-        image: "https://via.placeholder.com/150"
-      },
-      {
-        type: "book",
-        title: "1984",
-        description: "A dystopian novel about surveillance and control.",
-        image: "https://via.placeholder.com/150"
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setRecommendations([]);
+
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/recommendations', { title });
+    
+      if (Array.isArray(response.data)) {
+        // Success case: response is an array of recommendations
+        setRecommendations(response.data);
+      } else if (response.data && response.data.error) {
+        // Server-side error returned as { "error": "..." }
+        setError(response.data.error);
+      } else {
+        // Unknown response structure
+        setError('Unexpected response format from the server.');
       }
-    ]);
+    } catch (err) {
+      // Network or Axios error
+      if (err.response) {
+        setError(err.response.data.error || 'Something went wrong.');
+      } else {
+        setError('Failed to fetch recommendations.');
+      }
+    }
   };
 
   return (
-    <Container>
-      <AppBar position="static" color="primary">
-        <Typography variant="h4" align="center" sx={{ padding: 2 }}>
-          Recommender System
-        </Typography>
-      </AppBar>
-      <Container sx={{ marginTop: 4 }}>
-        <TextField
-          label="Enter Movie or Book Title"
-          variant="outlined"
-          fullWidth
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+    <div>
+      <h1>Recommender System</h1>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter content title"
         />
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ marginTop: 2 }}
-          onClick={handleSearch}
-        >
-          Search
-        </Button>
-        <Grid container spacing={3} sx={{ marginTop: 4 }}>
-          {results.map((result, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card>
-                <CardMedia
-                  component="img"
-                  alt={result.title}
-                  height="150"
-                  image={result.image}
-                />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {result.title}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {result.description}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-    </Container>
+        <button type="submit">Get Recommendations</button>
+      </form>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <div>
+        <h2>Recommendations</h2>
+        {Array.isArray(recommendations) && recommendations.length > 0 ? (
+          recommendations.map((rec, index) => (
+            <div key={index}>
+              <h3>{rec.Title}</h3>
+              <p>{rec.Type}</p>
+              {rec.image_url && <img src={rec.image_url} alt={rec.Title} />}
+            </div>
+          ))
+        ) : (
+          <p>No recommendations available.</p>
+        )}
+      </div>
+    </div>
   );
 };
 
