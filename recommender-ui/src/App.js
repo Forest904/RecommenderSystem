@@ -13,7 +13,7 @@ const App = () => {
 
     try {
       const response = await axios.post('http://127.0.0.1:5000/recommendations', { title });
-    
+      console.log('Server response:', response.data);
       if (Array.isArray(response.data)) {
         // Success case: response is an array of recommendations
         setRecommendations(response.data);
