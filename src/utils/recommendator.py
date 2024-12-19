@@ -42,11 +42,11 @@ if not os.path.exists(CACHE_DIR):
 def load_datasets():
     # Load and combine books and movies data
     df_books = pd.read_csv('src/datasets/books_rs/books.csv')
-    df_movies = pd.read_csv('src/datasets/books_rs/movies.csv')
+    df_movies = pd.read_csv('src/datasets/books_rs/popular_movies.csv')
     df_books['Type'] = 'book'
     df_movies['Type'] = 'movie'
     df_combined = pd.concat([df_books, df_movies], ignore_index=True)
-    df_combined = df_combined[['Title', 'Author', 'Plot', 'Genres', 'Vote Average', 'Type']]
+    df_combined = df_combined[['Title', 'Author', 'Plot', 'Genres', 'Vote Average', 'Vote Count', 'Type', 'Large Cover URL']]
     return df_combined
 
 def get_wordnet_pos(word):
@@ -65,7 +65,7 @@ def preprocess_text(text, stop_words, lemmatizer, word_pattern):
 
 def preprocess_content_data(df_combined, stop_words, lemmatizer, word_pattern):
     # Create and preprocess 'tags' from multiple fields
-    df_combined['tags'] = df_combined[['Author', 'Plot', 'Type', 'Genres']].fillna('').agg(' '.join, axis=1)
+    df_combined['tags'] = df_combined[['Title', 'Author', 'Plot', 'Type', 'Genres']].fillna('').agg(' '.join, axis=1)
     df_combined['tags'] = df_combined['tags'].apply(lambda x: preprocess_text(x, stop_words, lemmatizer, word_pattern))
     return df_combined
 

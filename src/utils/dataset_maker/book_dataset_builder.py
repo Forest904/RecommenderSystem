@@ -53,7 +53,7 @@ def fetch_books(query, total_needed=100, max_results=40, order_by='relevance'):
             
             books_data.append({
                 'Title': title,
-                'Director': director,   # Keeping the same field name for comparability
+                'Author': director,   # Keeping the same field name for comparability
                 'Genres': genres_str,
                 'Plot': plot,
                 'Vote Average': vote_average,
@@ -119,4 +119,4 @@ def main(total_books):
 
 if __name__ == "__main__":
     # Adjust the total number of books as needed
-    main(total_books=1000)
+    main(total_books=10000)

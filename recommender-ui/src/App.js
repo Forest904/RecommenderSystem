@@ -8,6 +8,8 @@ import {
 } from "@mui/material";
 import Header from './components/Header/Header';
 import Carousel from './components/Carousel/Carousel';
+import SearchBar from './components/Forms/SearchBar';
+import Footer from './components/Footer/Footer';
 import axios from "axios";
 
 const App = () => {
@@ -40,27 +42,11 @@ const App = () => {
 
       <Container>
         {/* Search Bar */}
-        <Grid2 container spacing={2} marginTop={4} alignItems="center" justifyContent="center">
-          <Grid2 item xs={12} sm={8} md={6}>
-            <TextField
-              label="Search for a title"
-              variant="outlined"
-              fullWidth
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </Grid2>
-          <Grid2 item xs={12} sm={4} md={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              onClick={handleSearch}
-            >
-              Search
-            </Button>
-          </Grid2>
-        </Grid2>
+        <SearchBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          handleSearch={handleSearch}
+        />
 
         {/* Carousel */}
         {recommendations.length > 0 ? (
@@ -71,6 +57,9 @@ const App = () => {
           </Typography>
         )}
       </Container>
+
+      {/* Footer */}
+      <Footer />
     </>
   );
 };

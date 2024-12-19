@@ -6,11 +6,11 @@ import Card from '../Card/Card';
 
 const Carousel = ({ recommendations = [] }) => {
     const settings = {
-        dots: true,
-        infinite: true,
+        dots: false,
+        infinite: false,
         speed: 500,
         slidesToShow: 6,
-        slidesToScroll: 2,
+        slidesToScroll: 1,
         responsive: [
             {
                 breakpoint: 768,
@@ -25,8 +25,14 @@ const Carousel = ({ recommendations = [] }) => {
 
     return (
         <Slider {...settings}>
-            {recommendations.map((item, index) => (
-                <Card key={index} {...item} />
+            {recommendations.map(({ Title, Plot, image_url, Genres }, index) => (
+            <Card
+                key={index}
+                title={Title}
+                description={Plot}
+                image={image_url}
+                genres={Genres}
+            />
             ))}
         </Slider>
     );
