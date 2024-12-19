@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from utils.recommendator import initialize_recommender, get_balanced_recommendations
-from utils.contents_fetcher import get_content_url, get_batch_content_urls
+from utils.contents_fetcher import get_content_url
 import logging
 import pandas as pd
 
@@ -46,6 +46,7 @@ def get_recommendations():
         # Return recommendations as JSON
         return jsonify(recommended_contents.to_dict(orient='records'))
     except Exception as e:
+        
         logger.exception("Error in /recommendations endpoint")
         # Return a JSON error with 500 status code
         return jsonify({"error": str(e)}), 500
