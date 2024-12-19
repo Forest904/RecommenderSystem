@@ -55,7 +55,7 @@ def get_large_cover_url(images):
             return f"https://image.tmdb.org/t/p/original{file_path}"
     return None
 
-def process_movies(total_movies=100):
+def process_movies(total_movies=100000):
     """Fetch and process movie data efficiently."""
     movies_data = []
     total_pages = (total_movies // 20) + 1  

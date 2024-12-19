@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 from tqdm import tqdm
 
-CATEGORIES = ["fiction", "fantasy", "science-fiction", "adventure", "thriller"]
+CATEGORIES = ["juvenile-fiction", "fantasy", "science-fiction", "adventure", "thriller"]
 API_BASE_URL = "https://www.googleapis.com/books/v1/volumes"
 GENERIC_QUERY = "bestseller"  # A generic query to fetch popular books by relevance
 
@@ -119,4 +119,4 @@ def main(total_books):
 
 if __name__ == "__main__":
     # Adjust the total number of books as needed
-    main(total_books=100000)
+    main(total_books=1000)
