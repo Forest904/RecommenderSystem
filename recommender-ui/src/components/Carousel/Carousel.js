@@ -25,13 +25,12 @@ const Carousel = ({ recommendations = [] }) => {
 
     return (
         <Slider {...settings}>
-            {recommendations.map(({ Title, Plot, image_url, Genres }, index) => (
+            {recommendations.map(({ title, author, genres, plot, vote_average, vote_count, release_date, large_cover_url, type }, index) => (
             <Card
                 key={index}
-                title={Title}
-                description={Plot}
-                image={image_url}
-                genres={Genres}
+                title={title}
+                image={large_cover_url}
+                type={type}
             />
             ))}
         </Slider>

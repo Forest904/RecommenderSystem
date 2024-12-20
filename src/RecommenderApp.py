@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from utils.recommendator import initialize_recommender, get_balanced_recommendations
-from utils.contents_fetcher import get_content_url
+from utils.recommendator import get_balanced_recommendations, load_datasets
 import logging
 import pandas as pd
 
@@ -9,8 +8,8 @@ import pandas as pd
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize recommender data
-df, embeddings = initialize_recommender()
+# Load saved datasets
+df = load_datasets()
 
 # Create the Flask app
 app = Flask(__name__)
@@ -25,20 +24,12 @@ def get_recommendations():
         if not content_title:
             return jsonify({"error": "Content title cannot be empty."}), 400
 
-        recommendations = get_balanced_recommendations(
-            content_title, 12, df, embeddings
-        )
+        recommendations = get_balanced_recommendations(content_title, 12)
 
         if not recommendations:
             return jsonify({"error": f"No recommendations found for '{content_title}'."}), 404
 
-        recommended_contents = df[df['Title'].isin(recommendations)].copy()
-
-        # Enrich the recommendations with image URLs synchronously
-        recommended_contents['image_url'] = [
-            get_content_url(row['Title'], row['Type'])
-            for _, row in recommended_contents.iterrows()
-        ]
+        recommended_contents = df[df['title'].isin(recommendations)].copy()
 
         # Convert NaNs to None so JSON is valid
         recommended_contents = recommended_contents.where(pd.notnull(recommended_contents), None)

@@ -28,9 +28,9 @@ except LookupError:
     nltk.download('wordnet')
 
 try:
-    nltk.data.find('taggers/averaged_perceptron_tagger')
+    nltk.data.find('taggers/averaged_perceptron_tagger_eng')
 except LookupError:
-    nltk.download('averaged_perceptron_tagger')
+    nltk.download('averaged_perceptron_tagger_eng')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,10 +43,10 @@ def load_datasets():
     # Load and combine books and movies data
     df_books = pd.read_csv('src/datasets/books_rs/popular_books.csv')
     df_movies = pd.read_csv('src/datasets/books_rs/popular_movies.csv')
-    df_books['Type'] = 'book'
-    df_movies['Type'] = 'movie'
+    df_books['type'] = 'book'
+    df_movies['type'] = 'movie'
     df_combined = pd.concat([df_books, df_movies], ignore_index=True)
-    df_combined = df_combined[['Title', 'Author', 'Plot', 'Genres', 'Vote Average', 'Vote Count', 'Type', 'Large Cover URL']]
+    df_combined = df_combined[['title', 'author', 'plot', 'genres', 'vote_average', 'vote_count', 'release_date', 'type', 'large_cover_url']]
     return df_combined
 
 def get_wordnet_pos(word):
@@ -65,7 +65,7 @@ def preprocess_text(text, stop_words, lemmatizer, word_pattern):
 
 def preprocess_content_data(df_combined, stop_words, lemmatizer, word_pattern):
     # Create and preprocess 'tags' from multiple fields
-    df_combined['tags'] = df_combined[['Title', 'Author', 'Plot', 'Type', 'Genres']].fillna('').agg(' '.join, axis=1)
+    df_combined['tags'] = df_combined[['title', 'author', 'genres', 'plot']].fillna('').agg(' '.join, axis=1)
     df_combined['tags'] = df_combined['tags'].apply(lambda x: preprocess_text(x, stop_words, lemmatizer, word_pattern))
     return df_combined
 
@@ -78,7 +78,7 @@ def compute_similarity(X_train, X_test, embeddings):
 
 def predict_ratings(cosine_sim, X_train, X_test, k=10):
     # Predict test ratings from top-k similar items in train
-    train_ratings = X_train['Vote Average'].values
+    train_ratings = X_train['vote_average'].values
     top_k_idx = np.argsort(-cosine_sim, axis=1)[:, :k]
     top_k_sim = np.take_along_axis(cosine_sim, top_k_idx, axis=1)
     top_k_rat = train_ratings[top_k_idx]
@@ -88,7 +88,7 @@ def predict_ratings(cosine_sim, X_train, X_test, k=10):
         np.mean(top_k_rat, axis=1),  # fallback to average if no similarity
         np.sum(top_k_sim * top_k_rat, axis=1) / sums
     )
-    actual = X_test['Vote Average'].values
+    actual = X_test['vote_average'].values
     valid = ~np.isnan(actual)
     return actual[valid], weighted_avg[valid]
 
@@ -116,20 +116,20 @@ def evaluate_model(actual, predicted, threshold=5):
 def get_recommendations(content_title, df_combined, embeddings, k=10):
     # Recommend top-k similar items
     try:
-        idx = df_combined[df_combined['Title'] == content_title].index[0]
+        idx = df_combined[df_combined['title'] == content_title].index[0]
     except IndexError:
         logger.warning(f"'{content_title}' not found.")
         return []
     scores = cosine_similarity(embeddings[idx].reshape(1, -1), embeddings).flatten()
     sorted_idx = np.argsort(-scores)
     top_idx = sorted_idx[sorted_idx != idx][:k]
-    return df_combined.iloc[top_idx][['Title', 'Type']].to_dict(orient='records')
+    return df_combined.iloc[top_idx][['title', 'type']].to_dict(orient='records')
 
 def run_recommendation_and_evaluate(content_title, df_combined, embeddings, X_train, X_test, cosine_sim, threshold=5):
     # Get recommendations, predict ratings, evaluate performance
     recs = get_recommendations(content_title, df_combined, embeddings)
     for r in recs:
-        logger.info(f"{r['Title']} ({r['Type'].capitalize()})")
+        logger.info(f"{r['title']} ({r['type'].capitalize()})")
     actual, predicted = predict_ratings(cosine_sim, X_train, X_test)
     acc, prec, recall, f1, mse, rmse = evaluate_model(actual, predicted, threshold)
     logger.info("Evaluation Metrics:")
@@ -176,17 +176,21 @@ def initialize_recommender():
 
 def balance_recommendations(recommendations, min_recommendations):
     # Separate recommendations into books and movies
-    books = [rec for rec in recommendations if rec.get('Type') == 'book']
-    movies = [rec for rec in recommendations if rec.get('Type') == 'movie']
+    books = [rec for rec in recommendations if rec.get('type') == 'book']
+    movies = [rec for rec in recommendations if rec.get('type') == 'movie']
     
     # Determine the balanced minimum length
     min_length = min(len(books), len(movies), min_recommendations)
     
     # Combine an equal number of books and movies
     balanced_recommendations = books[:min_length] + movies[:min_length]
-    return [rec['Title'] for rec in balanced_recommendations]
+    return [rec['title'] for rec in balanced_recommendations]
 
-def get_balanced_recommendations(content_title, min_recommendations, df, embeddings):
+def get_balanced_recommendations(content_title, min_recommendations):
+    
+    #Initialize the recommender
+    df, embeddings = initialize_recommender()
+    
     # Get recommendations as a list of dictionaries
     recommendations = get_recommendations(content_title, df, embeddings, min_recommendations * 200)
     
