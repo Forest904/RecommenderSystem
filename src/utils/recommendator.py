@@ -192,7 +192,7 @@ def get_balanced_recommendations(content_title, min_recommendations):
     df, embeddings = initialize_recommender()
     
     # Get recommendations as a list of dictionaries
-    recommendations = get_recommendations(content_title, df, embeddings, min_recommendations * 200)
+    recommendations = get_recommendations(content_title, df, embeddings, min_recommendations * 50)
     
     # Balance the recommendations
     return balance_recommendations(recommendations, min_recommendations)
