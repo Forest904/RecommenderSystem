@@ -4,6 +4,7 @@ import axios from 'axios';
 export function Users() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState(''); 
   const [userMessage, setUserMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -12,6 +13,7 @@ export function Users() {
       const response = await axios.post('http://localhost:5000/create_user', {
         username,
         email,
+        password,
       });
       setUserMessage(response.data.message);
       setError('');
@@ -35,6 +37,12 @@ export function Users() {
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
       />
       <button onClick={handleCreateUser}>Create User</button>
       {userMessage && <p>{userMessage}</p>}

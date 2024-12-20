@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from utils.recommendator import get_balanced_recommendations, load_datasets
 from database.db_handler import get_db
+from werkzeug.security import generate_password_hash
 import pandas as pd
 
 class RecommendationService:
@@ -40,14 +41,18 @@ class RecommendationService:
             data = request.json
             username = data.get("username", "").strip()
             email = data.get("email", "").strip()
+            password = data.get("password", "").strip()
 
-            if not username or not email:
-                return jsonify({"error": "Username and email cannot be empty."}), 400
+            if not username or not email or not password:
+                return jsonify({"error": "Username, email, and password cannot be empty."}), 400
+
+            # Hash the password for security
+            password_hash = generate_password_hash(password)
 
             db = get_db()
             db.execute(
-                "INSERT INTO users (username, email) VALUES (?, ?)",
-                (username, email),
+                "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+                (username, email, password_hash),
             )
             db.commit()
 
