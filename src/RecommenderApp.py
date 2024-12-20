@@ -1,46 +1,30 @@
-from flask import Flask, jsonify, request
+from flask import Flask
 from flask_cors import CORS
-from utils.recommendator import get_balanced_recommendations, load_datasets
-import logging
-import pandas as pd
+from database.db_handler import init_db
+from services.recommendations import RecommendationService
+from utils.error_handler import error_response
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Load saved datasets
-df = load_datasets()
-
-# Create the Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app)
 
+recommender_service = RecommendationService()
+
+# Global error handler
+@app.errorhandler(Exception)
+def handle_exception(e):
+    return error_response(str(e), 500)
+
+# Endpoint to fetch recommendations
 @app.route('/recommendations', methods=['POST'])
 def get_recommendations():
-    try:
-        data = request.json
-        content_title = data.get('title', '').strip()
+    return recommender_service.handle_request()
 
-        if not content_title:
-            return jsonify({"error": "Content title cannot be empty."}), 400
+# Endpoint to create a user
+@app.route('/create_user', methods=['POST'])
+def create_user():
+    return recommender_service.create_user()
 
-        recommendations = get_balanced_recommendations(content_title, 12)
-
-        if not recommendations:
-            return jsonify({"error": f"No recommendations found for '{content_title}'."}), 404
-
-        recommended_contents = df[df['title'].isin(recommendations)].copy()
-
-        # Convert NaNs to None so JSON is valid
-        recommended_contents = recommended_contents.where(pd.notnull(recommended_contents), None)
-
-        # Return recommendations as JSON
-        return jsonify(recommended_contents.to_dict(orient='records'))
-    except Exception as e:
-        
-        logger.exception("Error in /recommendations endpoint")
-        # Return a JSON error with 500 status code
-        return jsonify({"error": str(e)}), 500
-
-if __name__ == '__main__':
+if __name__ == "__main__":
+    # Initialize the database
+    init_db(app)
     app.run(debug=True)

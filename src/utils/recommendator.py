@@ -41,8 +41,8 @@ if not os.path.exists(CACHE_DIR):
 
 def load_datasets():
     # Load and combine books and movies data
-    df_books = pd.read_csv('src/datasets/books_rs/popular_books.csv')
-    df_movies = pd.read_csv('src/datasets/books_rs/popular_movies.csv')
+    df_books = pd.read_csv('src/datasets/content_based/popular_books.csv')
+    df_movies = pd.read_csv('src/datasets/content_based/popular_movies.csv')
     df_books['type'] = 'book'
     df_movies['type'] = 'movie'
     df_combined = pd.concat([df_books, df_movies], ignore_index=True)
