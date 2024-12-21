@@ -1,28 +1,22 @@
-import React from "react";
-import { Container } from "@mui/material";
-import Header from './components/Header/Header';
-import Footer from './components/Footer/Footer';
-import { Users } from './components/Users/Users';
-import { Recommendations } from './components/Recommendations/Recommendations';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Container } from '@mui/material';
+import AccountPage from './templates/AccountPage';
+import LibraryPage from './templates/LibraryPage';
+import Recommendations from './components/Recommendations/Recommendations';
 
-const App = () => {
+function App() {
   return (
-    <>
-      {/* Header */}
-      <Header />
-
-      <Container>
-        {/* Recommendations Module */}
-        <Recommendations />
-
-        {/* User Module */}
-        <Users />
-      </Container>
-
-      {/* Footer */}
-      <Footer />
-    </>
+    <Router>
+      <Routes>
+      <Route path="/" element={<Recommendations />} />
+        <Route path="/account" element={<AccountPage />} />
+        <Route path="/library" element={<LibraryPage />} />
+        <Route path="/recommendations" element={<Recommendations />} />
+        <Route path="*" element={<Recommendations />} />
+      </Routes>
+    </Router>
   );
-};
+}
 
 export default App;

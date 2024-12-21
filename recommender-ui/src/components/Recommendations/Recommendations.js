@@ -42,3 +42,5 @@ export function Recommendations() {
     </Container>
   );
 }
+
+export default Recommendations;
