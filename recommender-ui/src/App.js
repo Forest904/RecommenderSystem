@@ -1,9 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { Container } from '@mui/material';
 import AccountPage from './templates/AccountPage';
 import LibraryPage from './templates/LibraryPage';
-import Recommendations from './components/Recommendations/Recommendations';
+import Recommendations from './templates/Recommendations';
 
 function App() {
   return (
