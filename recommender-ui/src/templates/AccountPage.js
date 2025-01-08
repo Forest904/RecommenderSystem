@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, TextField, Button, Typography, Grid, Paper } from '@mui/material';
+import { Container, TextField, Button, Typography, Paper, Grid2 } from '@mui/material';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 
@@ -47,8 +47,8 @@ function AccountPage() {
     <>
       <Header title="Account Details" />
       <Container>
-        <Grid container spacing={3} justifyContent="center">
-          <Grid item xs={12} sm={8} md={6}>
+        <Grid2 container spacing={3} justifyContent="center">
+          <Grid2 item xs={12} sm={8} md={6}>
             <Paper style={{ padding: '20px', marginTop: '20px' }}>
               <Typography variant="h4" gutterBottom>
                 Account Details
@@ -99,8 +99,8 @@ function AccountPage() {
                 </Button>
               </form>
             </Paper>
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       </Container>
       <Footer />
     </>
