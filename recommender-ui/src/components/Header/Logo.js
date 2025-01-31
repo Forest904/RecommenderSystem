@@ -1,11 +1,20 @@
 import React from 'react';
 import { Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
-const Logo = () => {
-    return (
-        <Typography variant="h6" color="inherit" style={{ marginRight: '1rem' }}>
-        </Typography>
-    );
-};
+function Logo() {
+  const navigate = useNavigate();
+  
+  return (
+    <Typography 
+      variant="h6" 
+      component="div" 
+      sx={{ cursor: 'pointer' }}
+      onClick={() => navigate('/')}
+    >
+      MyApp
+    </Typography>
+  );
+}
 
 export default Logo;

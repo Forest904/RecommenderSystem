@@ -1,11 +1,10 @@
 -- Create Users Table
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users_new (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
-    email TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL, -- Store hashed passwords for security
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    password_hash TEXT NOT NULL
 );
+
 
 -- Create User Profiles Table (Optional: for additional user details)
 CREATE TABLE IF NOT EXISTS user_profiles (

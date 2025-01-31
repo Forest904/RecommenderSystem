@@ -6,7 +6,7 @@ DATABASE = "app.db"
 def get_db():
     if "db" not in g:
         print("[DEBUG] Connecting to the database...")  # Debug log
-        g.db = sqlite3.connect(DATABASE)
+        g.db = sqlite3.connect(DATABASE, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)  # Allows multithreading  g.db.row_factory = sqlite3.Row
         g.db.row_factory = sqlite3.Row
         print("[DEBUG] Database connection established.")  # Debug log
     return g.db

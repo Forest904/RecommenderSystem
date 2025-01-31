@@ -1,21 +1,24 @@
 import React from 'react';
-import { Button } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Button, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
-const Navigation = () => {
-    return (
-        <div>
-            <Button color="inherit" component={Link} to="/">
-                Home
-            </Button>
-            <Button color="inherit" component={Link} to="/library">
-                Library
-            </Button>
-            <Button color="inherit" component={Link} to="/account">
-                Account
-            </Button>
-        </div>
-    );
-};
+function Navigation() {
+  const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem('user_id');
+
+  return (
+    <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
+      {isLoggedIn && (
+        <>
+          <Button color="inherit" onClick={() => navigate('/account')}>Account</Button>
+          <Button color="inherit" onClick={() => navigate('/library')}>Library</Button>
+        </>
+      )}
+      <Button color="inherit" onClick={() => navigate(isLoggedIn ? '/recommendations' : '/login')}>
+        {isLoggedIn ? 'Home' : 'Login'}
+      </Button>
+    </Box>
+  );
+}
 
 export default Navigation;
