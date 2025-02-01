@@ -6,8 +6,6 @@ import SearchBar from '../components/Forms/SearchBar';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 
-
-
 export function Recommendations() {
   const [contentTitle, setContentTitle] = useState('');
   const [recommendations, setRecommendations] = useState([]);
@@ -26,6 +24,9 @@ export function Recommendations() {
     }
   };
 
+  const books = recommendations.filter(item => item.type === 'book');
+  const movies = recommendations.filter(item => item.type === 'movie');
+
   return (
     <>
       <Header title="Recommendations by title" />
@@ -37,21 +38,32 @@ export function Recommendations() {
           handleSearch={handleGetRecommendations}
         />
   
-        {/* Carousel */}
-        {recommendations.length > 0 ? (
-          <Carousel recommendations={recommendations} />
-        ) : (
+        {/* Carousel for Movies */}
+        {movies.length > 0 && (
+          <>
+            <Typography variant="h6" style={{ textAlign: "center", marginTop: "20px" }}>Movies</Typography>
+            <Carousel recommendations={movies} />
+          </>
+        )}
+
+        {/* Carousel for Books */}
+        {books.length > 0 && (
+          <>
+            <Typography variant="h6" style={{ textAlign: "center", marginTop: "20px" }}>Books</Typography>
+            <Carousel recommendations={books} />
+          </>
+        )}
+
+        {/* Error Message */}
+        {error && (
           <Typography style={{ textAlign: "center", margin: "20px" }}>
-            {error || "No valid recommendations available."}
+            {error}
           </Typography>
         )}
       </Container>
       <Footer />
     </>
   );
-  
 }
 
 export default Recommendations;
-
-

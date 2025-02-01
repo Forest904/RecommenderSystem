@@ -62,10 +62,14 @@ function UserProfile() {
                   <Typography>{userData.username}</Typography>
                   <Button
                     variant="contained"
-                    color="secondary"
+                    color="primary"
                     fullWidth
                     onClick={handleLogout}
-                    style={{ marginTop: '20px' }}
+                    sx={{
+                      backgroundColor: '#fd1b1b',
+                      '&:hover': { backgroundColor: '#d11717' }, // Darker shade on hover
+                      marginTop: '20px'
+                    }}
                   >
                     Logout
                   </Button>
