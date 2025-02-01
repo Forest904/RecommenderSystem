@@ -30,7 +30,6 @@ const Carousel = ({ recommendations = [] }) => {
                 key={index}
                 title={title}
                 image={large_cover_url}
-                type={type}
             />
             ))}
         </Slider>

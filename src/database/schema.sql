@@ -28,4 +28,27 @@ CREATE TABLE IF NOT EXISTS user_library (
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-DROP TABLE IF EXISTS user_ratings;
+-- Create Movies and Books Table
+CREATE TABLE IF NOT EXISTS movies (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    author TEXT,
+    genres TEXT,
+    plot TEXT,
+    vote_average REAL,
+    vote_count INTEGER,
+    release_date DATE,
+    large_cover_url TEXT
+);
+
+CREATE TABLE IF NOT EXISTS books (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    author TEXT,
+    genres TEXT,
+    plot TEXT,
+    vote_average REAL,
+    vote_count INTEGER,
+    release_date INTEGER,
+    large_cover_url TEXT
+);

@@ -31,9 +31,9 @@ def create_user():
 @app.route('/account', methods=['POST', 'GET'])
 def manage_account():
     if request.method == 'POST':
-        return UserService.login()  # Ensure this method correctly handles login requests
+        return UserService.login()
     elif request.method == 'GET':
-        return UserService.get_profile()  # Optional: Use GET to fetch user profile info
+        return UserService.get_profile()
 
 
 # Library management endpoints

@@ -35,7 +35,7 @@ class UserService:
     @staticmethod
     def login():
         try:
-            data = request.json  # POST data
+            data = request.json
             username = data.get("username", "").strip()
             password = data.get("password", "").strip()
 
