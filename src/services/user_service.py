@@ -104,6 +104,49 @@ class UserService:
 
         except Exception as e:
             return jsonify({"error": str(e)}), 500
+        
+    @staticmethod
+    def get_user_favorites():
+        """
+        Fetch the list of favorite movies and books for a user.
+        """
+        try:
+            user_id = request.args.get("user_id")
+            if not user_id:
+                return jsonify({"error": "User ID is required."}), 400
+
+            db = get_db()
+
+            # Fetch favorite movies
+            favorite_movies = db.execute(
+                """
+                SELECT m.id, m.title, 'Movie' AS type, m.large_cover_url
+                FROM user_favorites uf
+                JOIN movies m ON uf.content_id = m.id
+                WHERE uf.user_id = ?
+                """,
+                (user_id,),
+            ).fetchall()
+
+            # Fetch favorite books
+            favorite_books = db.execute(
+                """
+                SELECT b.id, b.title, 'Book' AS type, b.large_cover_url
+                FROM user_favorites uf
+                JOIN books b ON uf.content_id = b.id
+                WHERE uf.user_id = ?
+                """,
+                (user_id,),
+            ).fetchall()
+
+            # Convert results to list of dictionaries
+            favorites = [dict(item) for item in favorite_movies] + [dict(item) for item in favorite_books]
+
+            return jsonify(favorites), 200
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
 
     @staticmethod
     def add_to_favorites():

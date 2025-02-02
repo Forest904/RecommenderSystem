@@ -13,7 +13,7 @@ function Navigation() {
       {isLoggedIn && (
         <>
           <Button color="inherit" onClick={() => navigate('/account')}>Account</Button>
-          <Button color="inherit" onClick={() => navigate('/library')}>Library</Button>
+          <Button color="inherit" onClick={() => navigate('/favorites')}>Favorites</Button>
         </>
       )}
       <Button color="inherit" onClick={() => navigate(isLoggedIn ? '/recommendations' : '/login')}>

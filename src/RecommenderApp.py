@@ -64,9 +64,11 @@ def get_content():
 def search_suggestions():
     return content_service.get_search_suggestions()
 
-@app.route('/favorites', methods=['POST', 'DELETE'])
+@app.route('/favorites', methods=['GET', 'POST', 'DELETE'])
 def manage_favorites():
-    if request.method == 'POST':
+    if request.method == 'GET':
+        return user_service.get_user_favorites()
+    elif request.method == 'POST':
         return user_service.add_to_favorites()
     elif request.method == 'DELETE':
         return user_service.remove_from_favorites()

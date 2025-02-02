@@ -5,6 +5,7 @@ import Recommendations from './templates/Recommendations';
 import ProfilePage from './templates/ProfilePage';
 import LoginPage from './templates/LoginPage';
 import ShowcasePage from './templates/ShowcasePage';
+import FavoritesPage from './templates/FavoritesPage';
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/account" element={<ProfilePage />} />
         <Route path="/showcase" element={<ShowcasePage />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/library" element={<LibraryPage />} />
         <Route path="/recommendations" element={<Recommendations />} />
         <Route path="*" element={<Recommendations />} />

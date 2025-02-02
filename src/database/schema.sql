@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 
 
 -- Create User Favorites Table (Tracks personalized recommendations)
-CREATE TABLE user_favorites (
+CREATE TABLE IF NOT EXISTS user_favorites (
     user_id INTEGER,
     content_id INTEGER,
     PRIMARY KEY (user_id, content_id),

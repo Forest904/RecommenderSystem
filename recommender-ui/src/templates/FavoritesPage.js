@@ -1,0 +1,127 @@
+import React, { useEffect, useState } from 'react';
+import {
+  Grid,
+  Container,
+  Typography,
+  Box,
+  Button
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header/Header';
+import Footer from '../components/Footer/Footer';
+import Card from '../components/Card/Card';
+
+const FavoritesPage = () => {
+  const [favorites, setFavorites] = useState([]);
+  const [userId, setUserId] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check for user authentication
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    if (storedUser && storedUser.id) {
+      setUserId(storedUser.id);
+    } else {
+      // Redirect to the login page if the user is not logged in
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    // Fetch user's favorite content
+    if (userId) {
+      fetch(`http://localhost:5000/favorites?user_id=${userId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setFavorites(data);
+        })
+        .catch((err) => console.error('Fetch Favorites Error:', err));
+    }
+  }, [userId]);
+
+  // Handle removing an item from favorites
+  const handleUnlike = (contentId) => {
+    if (!userId) return;
+
+    fetch('http://localhost:5000/favorites', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, content_id: contentId }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          // Remove the item from the favorites list in the UI
+          setFavorites((prevFavorites) => prevFavorites.filter(item => item.id !== contentId));
+        } else {
+          console.error("Error removing favorite");
+        }
+      })
+      .catch((err) => console.error('Error updating favorites:', err));
+  };
+
+  // Check if favorites list is empty
+  const hasFavorites = favorites.length > 0;
+
+  return (
+    <>
+      <Header />
+      <Container sx={{ minHeight: 'calc(100vh - 160px)', paddingBottom: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {!hasFavorites ? (
+          <Box sx={{ textAlign: 'center', marginTop: 10 }}>
+            <Typography variant="h5" gutterBottom>No Favorites Yet</Typography>
+            <Typography variant="body1" sx={{ mb: 3 }}>
+              You haven’t added any favorites. Explore movies and books to start your collection!
+            </Typography>
+            <Button variant="contained" color="primary" onClick={() => navigate('/')}>
+              Explore Content
+            </Button>
+          </Box>
+        ) : (
+          <Grid container spacing={2} sx={{ flexGrow: 1, mt: 3, mb: 10 }}>
+            <Grid item xs={6}>
+              <Typography variant="h5" gutterBottom>Movies</Typography>
+              <Grid container spacing={2}>
+                {favorites.filter((item) => item.type === 'Movie').map((item, index) => (
+                  <Grid item xs={6} key={index}>
+                    <Card 
+                      title={item.title} 
+                      image={item.large_cover_url} 
+                      contentId={item.id}
+                      userId={userId}
+                      isLiked={true} // Always liked since these are favorites
+                      onLikeToggle={() => handleUnlike(item.id)} // Now allows unliking
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography variant="h5" gutterBottom>Books</Typography>
+              <Grid container spacing={2}>
+                {favorites.filter((item) => item.type === 'Book').map((item, index) => (
+                  <Grid item xs={6} key={index}>
+                    <Card 
+                      title={item.title} 
+                      image={item.large_cover_url} 
+                      contentId={item.id}
+                      userId={userId}
+                      isLiked={true} // Always liked since these are favorites
+                      onLikeToggle={() => handleUnlike(item.id)} // Now allows unliking
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Grid>
+          </Grid>
+        )}
+        <Box sx={{ marginTop: 'auto', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <Footer />
+          </Box>
+        </Box>
+      </Container>
+    </>
+  );
+};
+
+export default FavoritesPage;
