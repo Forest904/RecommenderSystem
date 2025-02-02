@@ -53,12 +53,17 @@ def manage_library():
 def get_content():
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 20))
-    search_query = request.args.get('search', '').strip()
+    # Use the proper parameter names as provided by the front end
+    search_query = request.args.get('search_query', '').strip()
     content_type = request.args.get('type', '').strip()
-    sort_by = request.args.get('sort', 'title')
+    sort_by = request.args.get('sort_by', 'title')
     order = request.args.get('order', 'asc')
     
     return content_service.get_content(page, limit, search_query, content_type, sort_by, order)
+
+@app.route('/search_suggestions', methods=['GET'])
+def search_suggestions():
+    return content_service.get_search_suggestions()
 
 @app.route('/favicon.ico')
 def favicon():

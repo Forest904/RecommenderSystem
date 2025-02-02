@@ -1,5 +1,5 @@
 from database.db_handler import get_db
-from flask import jsonify
+from flask import jsonify, request
 
 class ContentService:
     @staticmethod
@@ -8,56 +8,88 @@ class ContentService:
             db = get_db()
             offset = (page - 1) * limit
 
-            # Define valid sorting fields
+            print(f"🔥 Received search_query: '{search_query}'")  # Debug
+
+            # Validate sorting parameters.
             valid_sort_fields = {
                 "title": "title",
-                "release": "release",
+                "release": "release_date",
                 "vote_average": "vote_average"
             }
             sort_column = valid_sort_fields.get(sort_by, "title")
-
-            # Define sorting order
             order = "ASC" if order.lower() == "asc" else "DESC"
 
-            # Base queries for movies and books
-            base_query_movies = """
-                SELECT id, title, 'Movie' AS type, author, genres, plot, vote_average, vote_count, 
-                    release_date AS release, large_cover_url 
-                FROM movies
-            """
-            base_query_books = """
-                SELECT id, title, 'Book' AS type, author, genres, plot, vote_average, vote_count, 
-                    release_date AS release, large_cover_url 
-                FROM books
-            """
-
-            # Apply search filter
-            filter_clause = ""
-            params = []
+            # Build separate filters and parameter lists for movies and books.
+            movie_filter = "1=1"
+            book_filter = "1=1"
+            params_movies = []
+            params_books = []
 
             if search_query:
-                filter_clause = " WHERE title LIKE ?"
-                params.append(f"%{search_query}%")
+                movie_filter += " AND title LIKE ?"
+                book_filter += " AND title LIKE ?"
+                params_movies.append(f"%{search_query}%")
+                params_books.append(f"%{search_query}%")
 
-            # Apply filters to both queries
-            base_query_movies += filter_clause
-            base_query_books += filter_clause
+            # Construct the two sub-queries.
+            query_movies = f"""
+                SELECT id, title, 'Movie' AS type, author, genres, plot, vote_average, vote_count, 
+                    release_date, large_cover_url 
+                FROM movies WHERE {movie_filter}
+            """
+            query_books = f"""
+                SELECT id, title, 'Book' AS type, author, genres, plot, vote_average, vote_count, 
+                    release_date, large_cover_url 
+                FROM books WHERE {book_filter}
+            """
 
-            # Use UNION ALL directly (no parentheses)
+            # Combine the two queries via UNION ALL, then sort and paginate.
             full_query = f"""
                 SELECT * FROM (
-                    {base_query_movies}
+                    {query_movies}
                     UNION ALL
-                    {base_query_books}
-                ) 
+                    {query_books}
+                ) AS content
                 ORDER BY {sort_column} {order}
                 LIMIT ? OFFSET ?
             """
-            params.extend([limit, offset])
 
-            # Execute query
-            results = db.execute(full_query, params).fetchall()
+            # Merge the parameters in the order in which the placeholders appear.
+            parameters = params_movies + params_books + [limit, offset]
+
+            print(f"🔥 Executing Query:\n{full_query}")
+            print(f"🔥 Query Parameters:\n{parameters}")
+
+            results = db.execute(full_query, parameters).fetchall()
 
             return jsonify([dict(item) for item in results]), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_search_suggestions():
+        try:
+            search_query = request.args.get("query", "").strip()
+            if not search_query:
+                return jsonify([]), 200
+
+            db = get_db()
+            query = """
+                SELECT title FROM (
+                    SELECT title FROM movies WHERE title LIKE ?
+                    UNION ALL
+                    SELECT title FROM books WHERE title LIKE ?
+                ) LIMIT 10
+            """
+            params = (f"%{search_query}%", f"%{search_query}%")
+
+            print(f"Executing query: {query} with params: {params}")
+
+            results = db.execute(query, params).fetchall()
+
+            suggestions = [row["title"] for row in results]
+            print(f"Suggestions found: {suggestions}")
+
+            return jsonify(suggestions), 200
         except Exception as e:
             return jsonify({"error": str(e)}), 500
