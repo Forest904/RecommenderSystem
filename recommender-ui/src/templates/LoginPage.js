@@ -21,9 +21,11 @@ function LoginPage() {
   
     try {
       if (isLogin) {
-        const response = await axios.post('http://localhost:5000/account', { username, password }); // Changed to POST for password verification
+        const response = await axios.post('http://localhost:5000/account', { username, password });
         if (response.data && response.data.user_id) {
-          localStorage.setItem('user_id', response.data.user_id);
+          const userData = { id: response.data.user_id, username: response.data.username };
+          localStorage.setItem('user', JSON.stringify(userData));
+          console.log("User stored in localStorage:", userData);
           navigate('/profile');
         } else {
           setError('Invalid username or password.');
@@ -39,7 +41,6 @@ function LoginPage() {
       setError(err.response?.data?.error || 'Authentication failed. Please try again.');
     }
   };
-  
 
   return (
     <>

@@ -1,10 +1,13 @@
 import React from 'react';
-import { Card as MUICard, CardMedia, CardContent, Typography, Button } from '@mui/material';
+import { Card as MUICard, CardMedia, CardContent, Typography, Button, IconButton } from '@mui/material';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
-const Card = ({ title, image, actionLabel, onAction }) => {
+const Card = ({ title, image, actionLabel, onAction, userId, contentId, isLiked, onLikeToggle }) => {
     // Ensure valid image URL
     const imageUrl = image && image.startsWith("http") ? image : "/placeholder-image.jpg";
     console.log("Final Image URL:", imageUrl); // Debugging
+    console.log("Card Props:", { title, image, userId, contentId, isLiked }); // Debugging
 
     return (
         <MUICard
@@ -35,10 +38,18 @@ const Card = ({ title, image, actionLabel, onAction }) => {
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'flex-end',
+                    position: 'relative'
                 }}
             >
-                <Typography variant="body2" component="div">
+                <Typography variant="body2" component="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     {title}
+                    {userId ? (
+                        <IconButton onClick={onLikeToggle} color="primary">
+                            {isLiked ? <FavoriteIcon color="error" /> : <FavoriteBorderIcon />}
+                        </IconButton>
+                    ) : (
+                        console.log("Like button not rendering because userId is missing.")
+                    )}
                 </Typography>
                 {actionLabel && onAction && (
                     <Button

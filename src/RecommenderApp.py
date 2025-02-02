@@ -37,7 +37,6 @@ def manage_account():
     elif request.method == 'GET':
         return UserService.get_profile()
 
-
 # Library management endpoints
 @app.route('/library', methods=['GET', 'POST', 'DELETE'])
 def manage_library():
@@ -64,6 +63,13 @@ def get_content():
 @app.route('/search_suggestions', methods=['GET'])
 def search_suggestions():
     return content_service.get_search_suggestions()
+
+@app.route('/favorites', methods=['POST', 'DELETE'])
+def manage_favorites():
+    if request.method == 'POST':
+        return user_service.add_to_favorites()
+    elif request.method == 'DELETE':
+        return user_service.remove_from_favorites()
 
 @app.route('/favicon.ico')
 def favicon():

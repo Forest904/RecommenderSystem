@@ -4,7 +4,7 @@ import bcrypt
 
 class UserService:
     """
-    Service layer for handling user account and library operations.
+    Service layer for handling user account, library, and favorites operations.
     """
     @staticmethod
     def create_user():
@@ -44,14 +44,18 @@ class UserService:
 
             db = get_db()
             user = db.execute(
-                "SELECT id, password_hash FROM users WHERE username = ?",
+                "SELECT id, username, password_hash FROM users WHERE username = ?",
                 (username,),
             ).fetchone()
 
             if user is None or not bcrypt.checkpw(password.encode('utf-8'), user["password_hash"].encode('utf-8')):
                 return jsonify({"error": "Invalid username or password."}), 401
 
-            return jsonify({"user_id": user["id"]}), 200
+            # Return user details including username
+            return jsonify({
+                "user_id": user["id"],
+                "username": user["username"]
+            }), 200
 
         except Exception as e:
             return jsonify({"error": str(e)}), 500
@@ -78,8 +82,6 @@ class UserService:
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
-
-
     @staticmethod
     def get_user_library():
         try:
@@ -104,45 +106,45 @@ class UserService:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
-    def add_to_library():
+    def add_to_favorites():
         try:
             data = request.json
             user_id = data.get("user_id")
             content_id = data.get("content_id")
 
             if not user_id or not content_id:
-                return jsonify({"error": "User ID and content ID are required."}), 400
+                return jsonify({"error": "User ID and Content ID are required."}), 400
 
             db = get_db()
             db.execute(
-                "INSERT INTO user_library (user_id, content_id) VALUES (?, ?)",
+                "INSERT INTO user_favorites (user_id, content_id) VALUES (?, ?) ON CONFLICT DO NOTHING",
                 (user_id, content_id),
             )
             db.commit()
 
-            return jsonify({"message": "Content added to library successfully."}), 201
+            return jsonify({"message": "Content added to favorites."}), 201
 
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
-    def delete_from_library():
+    def remove_from_favorites():
         try:
             data = request.json
             user_id = data.get("user_id")
             content_id = data.get("content_id")
 
             if not user_id or not content_id:
-                return jsonify({"error": "User ID and content ID are required."}), 400
+                return jsonify({"error": "User ID and Content ID are required."}), 400
 
             db = get_db()
             db.execute(
-                "DELETE FROM user_library WHERE user_id = ? AND content_id = ?",
+                "DELETE FROM user_favorites WHERE user_id = ? AND content_id = ?",
                 (user_id, content_id),
             )
             db.commit()
 
-            return jsonify({"message": "Content removed from library successfully."}), 200
+            return jsonify({"message": "Content removed from favorites."}), 200
 
         except Exception as e:
             return jsonify({"error": str(e)}), 500

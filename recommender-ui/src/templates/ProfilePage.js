@@ -11,7 +11,9 @@ function UserProfile() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const userId = localStorage.getItem('user_id') || '0';
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const userId = user?.id || '0';
 
   useEffect(() => {
     if (userId === '0') {
@@ -35,7 +37,7 @@ function UserProfile() {
   }, [userId, navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('user_id'); // Remove user session
+    localStorage.removeItem('user'); // Remove user session
     navigate('/login'); // Redirect to login page
   };
 

@@ -19,13 +19,13 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 );
 
 
--- Create User Library Table (Tracks personalized recommendations)
-CREATE TABLE IF NOT EXISTS user_library (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    content_title TEXT NOT NULL,
-    recommended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
+-- Create User Favorites Table (Tracks personalized recommendations)
+CREATE TABLE user_favorites (
+    user_id INTEGER,
+    content_id INTEGER,
+    PRIMARY KEY (user_id, content_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (content_id) REFERENCES contents(id)
 );
 
 -- Create Movies and Books Table
