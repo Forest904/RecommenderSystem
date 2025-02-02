@@ -8,7 +8,7 @@ class ContentService:
             db = get_db()
             offset = (page - 1) * limit
 
-            print(f"🔥 Received search_query: '{search_query}'")  # Debug
+            # Debug print(f"Received search_query: '{search_query}'")  
 
             # Validate sorting parameters.
             valid_sort_fields = {
@@ -57,8 +57,8 @@ class ContentService:
             # Merge the parameters in the order in which the placeholders appear.
             parameters = params_movies + params_books + [limit, offset]
 
-            print(f"🔥 Executing Query:\n{full_query}")
-            print(f"🔥 Query Parameters:\n{parameters}")
+            # Debug print(f"Executing Query:\n{full_query}")
+            # Debug print(f"Query Parameters:\n{parameters}")
 
             results = db.execute(full_query, parameters).fetchall()
 
@@ -83,12 +83,12 @@ class ContentService:
             """
             params = (f"%{search_query}%", f"%{search_query}%")
 
-            print(f"Executing query: {query} with params: {params}")
+            # Debug print(f"Executing query: {query} with params: {params}")
 
             results = db.execute(query, params).fetchall()
 
             suggestions = [row["title"] for row in results]
-            print(f"Suggestions found: {suggestions}")
+            # Debug print(f"Suggestions found: {suggestions}")
 
             return jsonify(suggestions), 200
         except Exception as e:
