@@ -14,7 +14,7 @@ function Navigation() {
           <Button color="inherit" onClick={() => navigate('/library')}>Library</Button>
         </>
       )}
-      <Button color="inherit" onClick={() => navigate(isLoggedIn ? '/recommendations' : '/login')}>
+      <Button color="inherit" onClick={() => navigate(isLoggedIn ? '/recommendations'  : '/login')}>
         {isLoggedIn ? 'Home' : 'Login'}
       </Button>
     </Box>

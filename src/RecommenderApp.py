@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from database.db_handler import init_db
 from services.recommendations_service import RecommendationService
+from services.content_service import ContentService
 from services.user_service import UserService
 from utils.error_handler import error_response
 from flask import request
@@ -12,6 +13,7 @@ CORS(app)
 # Initialize service instances
 recommender_service = RecommendationService()
 user_service = UserService()
+content_service = ContentService()
 
 # Global error handler
 @app.errorhandler(Exception)
@@ -45,6 +47,22 @@ def manage_library():
         return user_service.add_to_library()
     elif request.method == 'DELETE':
         return user_service.delete_from_library()
+    
+# Content fetching endpoint
+@app.route('/content', methods=['GET'])
+def get_content():
+    page = int(request.args.get('page', 1))
+    limit = int(request.args.get('limit', 20))
+    search_query = request.args.get('search', '').strip()
+    content_type = request.args.get('type', '').strip()
+    sort_by = request.args.get('sort', 'title')
+    order = request.args.get('order', 'asc')
+    
+    return content_service.get_content(page, limit, search_query, content_type, sort_by, order)
+
+@app.route('/favicon.ico')
+def favicon():
+    return ('', 204)  # Respond with No Content
 
 if __name__ == "__main__":
     # Initialize the database
