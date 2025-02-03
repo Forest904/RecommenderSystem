@@ -13,8 +13,13 @@ export function Recommendations() {
 
   const handleGetRecommendations = async () => {
     try {
+      if (!contentTitle.trim()) {
+        setError('Please enter a title to search for recommendations.');
+        return;
+      }
+      
       const response = await axios.post('http://localhost:5000/recommendations', {
-        title: contentTitle,
+        titles: [contentTitle],
       });
       setRecommendations(response.data);
       setError('');
@@ -31,6 +36,9 @@ export function Recommendations() {
     <>
       <Header title="Recommendations by title" />
       <Container>
+      <Typography variant="h4" sx={{ textAlign: 'center', mt: 3, mb: 3 }}>
+          Search for recommendations by title
+        </Typography>
         {/* Search Bar */}
         <SearchBar
           searchQuery={contentTitle}

@@ -12,12 +12,20 @@ function Navigation() {
     <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
       {isLoggedIn && (
         <>
-          <Button color="inherit" onClick={() => navigate('/account')}>Account</Button>
+          <Button color="inherit" onClick={() => navigate('/showcase')}>Showcase</Button>
+          <Button color="inherit" onClick={() => navigate('/recommendation')}>Title Search</Button>
           <Button color="inherit" onClick={() => navigate('/favorites')}>Favorites</Button>
+          <Button color="inherit" onClick={() => navigate('/foryou')}>For You</Button>
         </>
       )}
-      <Button color="inherit" onClick={() => navigate(isLoggedIn ? '/recommendations' : '/login')}>
-        {isLoggedIn ? 'Home' : 'Login'}
+      {!isLoggedIn && (
+        <>
+          <Button color="inherit" onClick={() => navigate('/showcase')}>Showcase</Button>
+          <Button color="inherit" onClick={() => navigate('/recommendation')}>Title Search</Button>
+        </>
+      )}
+      <Button color="inherit" onClick={() => navigate(isLoggedIn ? '/account' : '/login')}>
+        {isLoggedIn ? 'Account' : 'Login'}
       </Button>
     </Box>
   );

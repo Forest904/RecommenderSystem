@@ -1,5 +1,5 @@
 import React from 'react';
-import Slider from 'react-slick'; // React Slick carousel library
+import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import Card from '../Card/Card';
@@ -26,11 +26,12 @@ const Carousel = ({ recommendations = [] }) => {
     return (
         <Slider {...settings}>
             {recommendations.map(({ title, author, genres, plot, vote_average, vote_count, release_date, large_cover_url, type }, index) => (
-            <Card
-                key={index}
-                title={title}
-                image={large_cover_url}
-            />
+                <Card
+                    key={index}
+                    title={title}
+                    image={large_cover_url}
+                    contentType={type}
+                />
             ))}
         </Slider>
     );

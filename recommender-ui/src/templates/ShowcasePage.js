@@ -1,11 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import {
-  Grid,
-  Container,
-  Typography,
-  Button,
-  Box,
-} from '@mui/material';
+import { Grid, Container, Typography, Button, Box } from '@mui/material';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import Card from '../components/Card/Card';
@@ -17,6 +11,7 @@ const ShowcasePage = () => {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('title');
+  const [contentType, setContentType] = useState(''); // '' means both types, or 'movie'/'book'
   const [userId, setUserId] = useState(null);
   const footerRef = useRef(null);
   const [footerInView, setFooterInView] = useState(false);
@@ -25,20 +20,21 @@ const ShowcasePage = () => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
     if (storedUser && storedUser.id) {
       setUserId(storedUser.id);
-      console.log("Current User ID:", userId);
+      console.log("Current User ID:", storedUser.id);
     }
   }, []);
 
   useEffect(() => {
+    // Include the content_type parameter in the query string.
     fetch(
       `http://localhost:5000/content?page=${page}&search_query=${encodeURIComponent(
         searchQuery.trim()
-      )}&sort_by=${sortBy}`
+      )}&sort_by=${sortBy}&content_type=${contentType}`
     )
       .then((res) => res.json())
       .then((data) => setContent(data))
       .catch((err) => console.error('Fetch Error:', err));
-  }, [page, searchQuery, sortBy]);
+  }, [page, searchQuery, sortBy, contentType]);
 
   useEffect(() => {
     if (userId) {
@@ -70,7 +66,9 @@ const ShowcasePage = () => {
     })
       .then(() => {
         setFavorites((prevFavorites) =>
-          isLiked ? prevFavorites.filter((id) => id !== contentId) : [...prevFavorites, contentId]
+          isLiked
+            ? prevFavorites.filter((id) => id !== contentId)
+            : [...prevFavorites, contentId]
         );
       })
       .catch((err) => console.error('Error updating favorites:', err));
@@ -79,52 +77,126 @@ const ShowcasePage = () => {
   return (
     <>
       <Header />
-      <Container sx={{ minHeight: 'calc(100vh - 160px)', paddingBottom: '80px', display: 'flex', flexDirection: 'column' }}>
-        <SearchAndFilters searchQuery={searchQuery} setSearchQuery={setSearchQuery} sortBy={sortBy} setSortBy={setSortBy} />
+      <Container
+        sx={{
+          minHeight: 'calc(100vh - 160px)',
+          paddingBottom: '80px',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Typography variant="h4" sx={{ textAlign: 'left', mt: 3, mb: 3 }}>
+          "Search high and low, filter to your heart's content... or just wing it!"
+        </Typography>
+        <SearchAndFilters 
+          searchQuery={searchQuery} 
+          setSearchQuery={setSearchQuery} 
+          sortBy={sortBy} 
+          setSortBy={setSortBy} 
+          contentType={contentType}
+          setContentType={setContentType}
+        />
         <Grid container spacing={2} sx={{ flexGrow: 1, mt: 3, mb: 10 }}>
-          <Grid item xs={6}>
-            <Typography variant="h5" gutterBottom>Movies</Typography>
-            <Grid container spacing={2}>
+          {(contentType === '' || contentType === 'movie') && (
+            <Grid
+              item
+              xs={contentType === '' ? 6 : 12}
+              sx={contentType === '' ? { borderRight: '1px solid gray' } : {}}
+            >
+              <Typography variant="h5" gutterBottom>Movies</Typography>
+              <Grid container spacing={2}>
                 {content.filter((item) => item.type === 'Movie').map((item, index) => (
-                    <Grid item xs={6} key={index}>
-                        <Card 
-                            title={item.title} 
-                            image={item.large_cover_url} 
-                            contentId={item.id}
-                            userId={userId}
-                            isLiked={favorites.includes(item.id)}
-                            onLikeToggle={() => handleLikeToggle(item.id)}
-                        />
-                    </Grid>
+                  <Grid
+                    item
+                    key={index}
+                    sx={{
+                      // If only one type is selected, show five cards per row (20% each); otherwise two per row (50%)
+                      flexBasis: contentType === '' ? '50%' : '20%',
+                      maxWidth: contentType === '' ? '50%' : '20%'
+                    }}
+                  >
+                    <Card 
+                      title={item.title} 
+                      image={item.large_cover_url} 
+                      contentId={item.id}
+                      userId={userId}
+                      isLiked={favorites.includes(item.id)}
+                      onLikeToggle={() => handleLikeToggle(item.id)}
+                    />
+                  </Grid>
                 ))}
+              </Grid>
             </Grid>
-          </Grid>
-          <Grid item xs={6}>
-            <Typography variant="h5" gutterBottom>Books</Typography>
-            <Grid container spacing={2}>
-              {content.filter((item) => item.type === 'Book').map((item, index) => (
-                <Grid item xs={6} key={index}>
-                  <Card 
-                    title={item.title} 
-                    image={item.large_cover_url} 
-                    contentId={item.id}
-                    userId={userId}
-                    isLiked={favorites.includes(item.id)}
-                    onLikeToggle={() => handleLikeToggle(item.id)}
-                  />
-                </Grid>
-              ))}
+          )}
+          {(contentType === '' || contentType === 'book') && (
+            <Grid item xs={contentType === '' ? 6 : 12}>
+              <Typography variant="h5" gutterBottom>Books</Typography>
+              <Grid container spacing={2}>
+                {content.filter((item) => item.type === 'Book').map((item, index) => (
+                  <Grid
+                    item
+                    key={index}
+                    sx={{
+                      flexBasis: contentType === '' ? '50%' : '20%',
+                      maxWidth: contentType === '' ? '50%' : '20%'
+                    }}
+                  >
+                    <Card 
+                      title={item.title} 
+                      image={item.large_cover_url} 
+                      contentId={item.id}
+                      userId={userId}
+                      isLiked={favorites.includes(item.id)}
+                      onLikeToggle={() => handleLikeToggle(item.id)}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
             </Grid>
-          </Grid>
+          )}
         </Grid>
-        <Box sx={{ marginTop: 'auto', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }} ref={footerRef}>
+        <Box
+          sx={{
+            marginTop: 'auto',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}
+          ref={footerRef}
+        >
           <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
             <Footer />
           </Box>
           {footerInView && (
-            <Box sx={{ position: 'absolute', bottom: 10, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 10, mt: 2, mb: 2 }}>
-              <Button variant="contained" disabled={page === 1} onClick={() => setPage((prev) => Math.max(prev - 1, 1))} sx={{ mx: 2 }}>Previous Page</Button>
-              <Button variant="contained" onClick={() => setPage((prev) => prev + 1)} sx={{ mx: 2 }}>Next Page</Button>
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 10,
+                left: 0,
+                right: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                zIndex: 10,
+                mt: 2,
+                mb: 2
+              }}
+            >
+              <Button
+                variant="contained"
+                disabled={page === 1}
+                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                sx={{ mx: 2 }}
+              >
+                Previous Page
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => setPage((prev) => prev + 1)}
+                sx={{ mx: 2 }}
+              >
+                Next Page
+              </Button>
             </Box>
           )}
         </Box>

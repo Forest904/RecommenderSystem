@@ -3,17 +3,17 @@ import { Card as MUICard, CardMedia, CardContent, Typography, Button, IconButton
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
-const Card = ({ title, image, actionLabel, onAction, userId, contentId, isLiked, onLikeToggle }) => {
+const Card = ({ title, image, actionLabel, onAction, userId, contentId, isLiked, onLikeToggle, contentType }) => {
     // Ensure valid image URL
     const imageUrl = image && image.startsWith("http") ? image : "/placeholder-image.jpg";
     console.log("Final Image URL:", imageUrl); // Debugging
-    console.log("Card Props:", { title, image, userId, contentId, isLiked }); // Debugging
+    console.log("Card Props:", { title, image, userId, contentId, isLiked, contentType }); // Debugging
 
     return (
         <MUICard
             style={{
                 margin: '1rem',
-                height: '250px',
+                height: '270px',
                 display: 'flex',
                 flexDirection: 'column',
             }}
@@ -42,7 +42,7 @@ const Card = ({ title, image, actionLabel, onAction, userId, contentId, isLiked,
                 }}
             >
                 <Typography variant="body2" component="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    {title}
+                    {title} ({contentType})
                     {userId ? (
                         <IconButton onClick={onLikeToggle} color="primary">
                             {isLiked ? <FavoriteIcon color="error" /> : <FavoriteBorderIcon />}

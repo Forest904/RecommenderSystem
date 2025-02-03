@@ -4,7 +4,8 @@ import {
   Container,
   Typography,
   Box,
-  Button
+  Button,
+  Divider
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
@@ -17,18 +18,15 @@ const FavoritesPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for user authentication
     const storedUser = JSON.parse(localStorage.getItem('user'));
     if (storedUser && storedUser.id) {
       setUserId(storedUser.id);
     } else {
-      // Redirect to the login page if the user is not logged in
       navigate('/login');
     }
   }, [navigate]);
 
   useEffect(() => {
-    // Fetch user's favorite content
     if (userId) {
       fetch(`http://localhost:5000/favorites?user_id=${userId}`)
         .then((res) => res.json())
@@ -39,7 +37,6 @@ const FavoritesPage = () => {
     }
   }, [userId]);
 
-  // Handle removing an item from favorites
   const handleUnlike = (contentId) => {
     if (!userId) return;
 
@@ -50,7 +47,6 @@ const FavoritesPage = () => {
     })
       .then((res) => {
         if (res.ok) {
-          // Remove the item from the favorites list in the UI
           setFavorites((prevFavorites) => prevFavorites.filter(item => item.id !== contentId));
         } else {
           console.error("Error removing favorite");
@@ -59,26 +55,26 @@ const FavoritesPage = () => {
       .catch((err) => console.error('Error updating favorites:', err));
   };
 
-  // Check if favorites list is empty
   const hasFavorites = favorites.length > 0;
 
   return (
     <>
       <Header />
-      <Container sx={{ minHeight: 'calc(100vh - 160px)', paddingBottom: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Container sx={{ minHeight: 'calc(100vh - 160px)', paddingBottom: '80px', display: 'flex', flexDirection: 'column' }}>
+        <Typography variant="h4" gutterBottom sx={{ marginTop: 3, fontWeight: 'bold' }}>
+          Your Favorite Movies & Books
+        </Typography>
         {!hasFavorites ? (
           <Box sx={{ textAlign: 'center', marginTop: 10 }}>
             <Typography variant="h5" gutterBottom>No Favorites Yet</Typography>
             <Typography variant="body1" sx={{ mb: 3 }}>
               You haven’t added any favorites. Explore movies and books to start your collection!
             </Typography>
-            <Button variant="contained" color="primary" onClick={() => navigate('/')}>
-              Explore Content
-            </Button>
+            <Button variant="contained" color="primary" onClick={() => navigate('/')}>Explore Content</Button>
           </Box>
         ) : (
           <Grid container spacing={2} sx={{ flexGrow: 1, mt: 3, mb: 10 }}>
-            <Grid item xs={6}>
+            <Grid item xs={6} sx={{ borderRight: '1px solid gray' }}>
               <Typography variant="h5" gutterBottom>Movies</Typography>
               <Grid container spacing={2}>
                 {favorites.filter((item) => item.type === 'Movie').map((item, index) => (
@@ -88,8 +84,8 @@ const FavoritesPage = () => {
                       image={item.large_cover_url} 
                       contentId={item.id}
                       userId={userId}
-                      isLiked={true} // Always liked since these are favorites
-                      onLikeToggle={() => handleUnlike(item.id)} // Now allows unliking
+                      isLiked={true}
+                      onLikeToggle={() => handleUnlike(item.id)}
                     />
                   </Grid>
                 ))}
@@ -105,8 +101,8 @@ const FavoritesPage = () => {
                       image={item.large_cover_url} 
                       contentId={item.id}
                       userId={userId}
-                      isLiked={true} // Always liked since these are favorites
-                      onLikeToggle={() => handleUnlike(item.id)} // Now allows unliking
+                      isLiked={true}
+                      onLikeToggle={() => handleUnlike(item.id)}
                     />
                   </Grid>
                 ))}

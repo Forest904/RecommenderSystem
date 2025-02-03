@@ -69,7 +69,7 @@ function UserProfile() {
                     onClick={handleLogout}
                     sx={{
                       backgroundColor: '#fd1b1b',
-                      '&:hover': { backgroundColor: '#d11717' }, // Darker shade on hover
+                      '&:hover': { backgroundColor: '#d11717' },
                       marginTop: '20px'
                     }}
                   >

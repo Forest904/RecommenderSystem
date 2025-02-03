@@ -6,10 +6,7 @@ class ContentService:
     def get_content(page=1, limit=20, search_query='', content_type='', sort_by='title', order='asc'):
         try:
             db = get_db()
-            offset = (page - 1) * limit
-
-            # Debug print(f"Received search_query: '{search_query}'")  
-
+            
             # Validate sorting parameters.
             valid_sort_fields = {
                 "title": "title",
@@ -17,52 +14,77 @@ class ContentService:
                 "vote_average": "vote_average"
             }
             sort_column = valid_sort_fields.get(sort_by, "title")
-            order = "ASC" if order.lower() == "asc" else "DESC"
+            order_clause = "ASC" if order.lower() == "asc" else "DESC"
+            
+            # Compute offset for pagination.
+            offset = (page - 1) * limit
 
-            # Build separate filters and parameter lists for movies and books.
-            movie_filter = "1=1"
-            book_filter = "1=1"
-            params_movies = []
-            params_books = []
-
+            # Build the filter clause for the search query.
+            # (You can extend this if you add more filters later.)
+            filter_clause = "1=1"
+            params = []
             if search_query:
-                movie_filter += " AND title LIKE ?"
-                book_filter += " AND title LIKE ?"
-                params_movies.append(f"%{search_query}%")
-                params_books.append(f"%{search_query}%")
+                filter_clause += " AND title LIKE ?"
+                params.append(f"%{search_query}%")
 
-            # Construct the two sub-queries.
-            query_movies = f"""
-                SELECT id, title, 'Movie' AS type, author, genres, plot, vote_average, vote_count, 
-                    release_date, large_cover_url 
-                FROM movies WHERE {movie_filter}
-            """
-            query_books = f"""
-                SELECT id, title, 'Book' AS type, author, genres, plot, vote_average, vote_count, 
-                    release_date, large_cover_url 
-                FROM books WHERE {book_filter}
-            """
+            # If a specific content type is requested, run only that query.
+            if content_type.lower() == 'movie':
+                query = f"""
+                    SELECT id, title, 'Movie' AS type, author, genres, plot, vote_average, vote_count, 
+                        release_date, large_cover_url 
+                    FROM movies 
+                    WHERE {filter_clause}
+                    ORDER BY {sort_column} {order_clause}
+                    LIMIT ? OFFSET ?
+                """
+                params_with_pagination = params + [limit, offset]
+                results = db.execute(query, params_with_pagination).fetchall()
+                return jsonify([dict(item) for item in results]), 200
 
-            # Combine the two queries via UNION ALL, then sort and paginate.
-            full_query = f"""
-                SELECT * FROM (
-                    {query_movies}
-                    UNION ALL
-                    {query_books}
-                ) AS content
-                ORDER BY {sort_column} {order}
-                LIMIT ? OFFSET ?
-            """
+            elif content_type.lower() == 'book':
+                query = f"""
+                    SELECT id, title, 'Book' AS type, author, genres, plot, vote_average, vote_count, 
+                        release_date, large_cover_url 
+                    FROM books 
+                    WHERE {filter_clause}
+                    ORDER BY {sort_column} {order_clause}
+                    LIMIT ? OFFSET ?
+                """
+                params_with_pagination = params + [limit, offset]
+                results = db.execute(query, params_with_pagination).fetchall()
+                return jsonify([dict(item) for item in results]), 200
 
-            # Merge the parameters in the order in which the placeholders appear.
-            parameters = params_movies + params_books + [limit, offset]
+            else:
+                # When no content_type is provided, get balanced results from both tables.
+                query_movies = f"""
+                    SELECT id, title, 'Movie' AS type, author, genres, plot, vote_average, vote_count, 
+                        release_date, large_cover_url 
+                    FROM movies 
+                    WHERE {filter_clause}
+                    ORDER BY {sort_column} {order_clause}
+                    LIMIT ? OFFSET ?
+                """
+                query_books = f"""
+                    SELECT id, title, 'Book' AS type, author, genres, plot, vote_average, vote_count, 
+                        release_date, large_cover_url 
+                    FROM books 
+                    WHERE {filter_clause}
+                    ORDER BY {sort_column} {order_clause}
+                    LIMIT ? OFFSET ?
+                """
+                params_movies = params + [limit, offset]
+                params_books = params + [limit, offset]
 
-            # Debug print(f"Executing Query:\n{full_query}")
-            # Debug print(f"Query Parameters:\n{parameters}")
+                results_movies = db.execute(query_movies, params_movies).fetchall()
+                results_books = db.execute(query_books, params_books).fetchall()
 
-            results = db.execute(full_query, parameters).fetchall()
+                # Combine the two result sets.
+                # (If you prefer interleaving the two lists instead of concatenation,
+                #  you could loop over the two lists alternately.)
+                combined_results = [dict(item) for item in results_movies] + [dict(item) for item in results_books]
 
-            return jsonify([dict(item) for item in results]), 200
+                return jsonify(combined_results), 200
+
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -83,13 +105,9 @@ class ContentService:
             """
             params = (f"%{search_query}%", f"%{search_query}%")
 
-            # Debug print(f"Executing query: {query} with params: {params}")
-
             results = db.execute(query, params).fetchall()
 
             suggestions = [row["title"] for row in results]
-            # Debug print(f"Suggestions found: {suggestions}")
-
             return jsonify(suggestions), 200
         except Exception as e:
             return jsonify({"error": str(e)}), 500

@@ -9,7 +9,14 @@ import {
   ListItemText
 } from '@mui/material';
 
-const SearchAndFilters = ({ searchQuery, setSearchQuery, sortBy, setSortBy }) => {
+const SearchAndFilters = ({ 
+  searchQuery, 
+  setSearchQuery, 
+  sortBy, 
+  setSortBy,
+  contentType,
+  setContentType 
+}) => {
   const [suggestions, setSuggestions] = useState([]);
 
   const fetchSuggestions = (query) => {
@@ -47,7 +54,7 @@ const SearchAndFilters = ({ searchQuery, setSearchQuery, sortBy, setSortBy }) =>
 
   return (
     <Grid container spacing={2} alignItems="center" sx={{ mt: 3, mb: 2 }}>
-      <Grid item xs={10}>
+      <Grid item xs={8}>
         <TextField
           fullWidth
           label="Search"
@@ -79,6 +86,19 @@ const SearchAndFilters = ({ searchQuery, setSearchQuery, sortBy, setSortBy }) =>
           <MenuItem value="title">Title</MenuItem>
           <MenuItem value="release">Release Date</MenuItem>
           <MenuItem value="vote_average">Rating</MenuItem>
+        </TextField>
+      </Grid>
+      <Grid item xs={2}>
+        <TextField
+          select
+          fullWidth
+          label="Content Type"
+          value={contentType}
+          onChange={(e) => setContentType(e.target.value)}
+        >
+          <MenuItem value="">All</MenuItem>
+          <MenuItem value="movie">Movie</MenuItem>
+          <MenuItem value="book">Book</MenuItem>
         </TextField>
       </Grid>
     </Grid>
