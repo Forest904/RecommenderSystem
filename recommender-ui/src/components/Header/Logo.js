@@ -12,7 +12,7 @@ function Logo() {
       sx={{ cursor: 'pointer' }}
       onClick={() => navigate('/')}
     >
-      MyApp
+      Watch & Read
     </Typography>
   );
 }

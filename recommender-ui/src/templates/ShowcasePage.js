@@ -86,7 +86,7 @@ const ShowcasePage = () => {
         }}
       >
         <Typography variant="h4" sx={{ textAlign: 'left', mt: 3, mb: 3 }}>
-          "Search high and low, filter to your heart's content... or just wing it!"
+            Cinema & Literature Showcase
         </Typography>
         <SearchAndFilters 
           searchQuery={searchQuery} 

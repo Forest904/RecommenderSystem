@@ -25,8 +25,8 @@ function LoginPage() {
         if (response.data && response.data.user_id) {
           const userData = { id: response.data.user_id, username: response.data.username };
           localStorage.setItem('user', JSON.stringify(userData));
-          console.log("User stored in localStorage:", userData);
-          navigate('/profile');
+          //console.log("User stored in localStorage:", userData);
+          navigate('/showcase');
         } else {
           setError('Invalid username or password.');
         }

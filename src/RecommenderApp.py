@@ -35,7 +35,12 @@ def manage_account():
     if request.method == 'POST':
         return UserService.login()
     elif request.method == 'GET':
-        return UserService.get_profile()
+        return UserService.get_profile_details()
+    
+# Profile details endpoints
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    return UserService.update_profile_details()
 
 # Library management endpoints
 @app.route('/library', methods=['GET', 'POST', 'DELETE'])

@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT NOT NULL
 );
 
-
 -- Create User Profiles Table (Optional: for additional user details)
 CREATE TABLE IF NOT EXISTS user_profiles (
     user_id INTEGER PRIMARY KEY,
@@ -15,6 +14,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     date_of_birth DATE,
     avatar_url TEXT,
     bio TEXT,
+    user_color TEXT,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
