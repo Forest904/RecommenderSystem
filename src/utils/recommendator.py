@@ -151,7 +151,7 @@ def initialize_recommender():
 
     if os.path.exists(df_cache_path) and os.path.exists(emb_cache_path):
         # Load cached data
-        logger.info("Loading preprocessed DataFrame and embeddings from cache.")
+        #logger.info("Loading preprocessed DataFrame and embeddings from cache.") # Removed for clearer logs
         with open(df_cache_path, 'rb') as f:
             df = pickle.load(f)
         embeddings = np.load(emb_cache_path)

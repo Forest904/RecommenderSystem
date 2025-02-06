@@ -21,14 +21,14 @@ class RecommendationService:
             recommendations = []
             for title in titles:
                 recs = get_balanced_recommendations(title, 12)
-                print(f"Recommendations for {title}: {recs}")  # Debugging log
+                #print(f"Recommendations for {title}: {recs}")  # Debugging log
                 recommended_contents = self.df[self.df['title'].isin(recs)].copy()
                 recommended_contents = recommended_contents.where(pd.notnull(recommended_contents), None)
                 recommendations.extend(recommended_contents.to_dict(orient='records'))
 
-            print("Final Recommendations:", recommendations)  # Debugging log
+            #print("Final Recommendations:", recommendations)  # Debugging log
             return jsonify(recommendations)
 
         except Exception as e:
-            print("Error in get_recommendations:", str(e))  # Debugging log
+            #print("Error in get_recommendations:", str(e))  # Debugging log
             return jsonify({"error": str(e)}), 500
