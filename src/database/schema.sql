@@ -52,3 +52,5 @@ CREATE TABLE IF NOT EXISTS books (
     release_date INTEGER,
     large_cover_url TEXT
 );
+
+

@@ -2,13 +2,18 @@ import React from 'react';
 import { Card as MUICard, CardMedia, CardContent, Typography, Button, IconButton } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import BookIcon from '@mui/icons-material/Book';
+import MovieIcon from '@mui/icons-material/Movie';
 
 const Card = ({ title, image, actionLabel, onAction, userId, contentId, isLiked, onLikeToggle, contentType }) => {
     // Ensure valid image URL
     const imageUrl = image && image.startsWith("http") ? image : "/placeholder-image.jpg";
-    console.log("Final Image URL:", imageUrl); // Debugging
-    console.log("Card Props:", { title, image, userId, contentId, isLiked, contentType }); // Debugging
-
+    const contentIcon = contentType === 'book' 
+    ? <BookIcon fontSize="small" color="primary" /> 
+    : contentType === 'movie' 
+    ? <MovieIcon fontSize="small" color="primary" /> 
+    : null;
+    
     return (
         <MUICard
             style={{
@@ -29,7 +34,7 @@ const Card = ({ title, image, actionLabel, onAction, userId, contentId, isLiked,
                 alt={title || "Placeholder title"}
                 onError={(e) => {
                     console.error("Image failed to load:", e.target.style.backgroundImage);
-                    e.target.style.backgroundImage = "url('/placeholder-image.jpg')"; // Fallback
+                    e.target.style.backgroundImage = "url('/placeholder-image.jpg')";
                 }}
             />
             <CardContent
@@ -42,14 +47,14 @@ const Card = ({ title, image, actionLabel, onAction, userId, contentId, isLiked,
                 }}
             >
                 <Typography variant="body2" component="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    {title} ({contentType})
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        {contentIcon} {title} 
+                    </span>
                     {userId ? (
                         <IconButton onClick={onLikeToggle} color="primary">
                             {isLiked ? <FavoriteIcon color="error" /> : <FavoriteBorderIcon />}
                         </IconButton>
-                    ) : (
-                        console.log("Like button not rendering because userId is missing.")
-                    )}
+                    ) : null}
                 </Typography>
                 {actionLabel && onAction && (
                     <Button

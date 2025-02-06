@@ -13,7 +13,6 @@ function Navigation() {
       {isLoggedIn && (
         <>
           <Button color="inherit" onClick={() => navigate('/showcase')}>Showcase</Button>
-          <Button color="inherit" onClick={() => navigate('/recommendation')}>Title Search</Button>
           <Button color="inherit" onClick={() => navigate('/favorites')}>Favorites</Button>
           <Button color="inherit" onClick={() => navigate('/foryou')}>For You</Button>
         </>
@@ -21,7 +20,6 @@ function Navigation() {
       {!isLoggedIn && (
         <>
           <Button color="inherit" onClick={() => navigate('/showcase')}>Showcase</Button>
-          <Button color="inherit" onClick={() => navigate('/recommendation')}>Title Search</Button>
         </>
       )}
       <Button color="inherit" onClick={() => navigate(isLoggedIn ? '/account' : '/login')}>

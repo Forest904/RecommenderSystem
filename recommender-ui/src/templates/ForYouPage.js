@@ -61,7 +61,7 @@ export function ForYou() {
         <Typography variant="h4" style={{ marginTop: '20px', marginBottom: '40px' }}>
           Personalized Recommendations Based on Your Favorites
         </Typography>
-
+  
         {/* No Favorites Message */}
         {favorites.length === 0 && !error ? (
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
@@ -71,18 +71,23 @@ export function ForYou() {
             </Button>
           </div>
         ) : (
-          Object.keys(recommendations).map((favTitle) => (
-            recommendations[favTitle].length > 0 && (
-              <div key={favTitle} style={{ marginBottom: '40px' }}>
-                <Typography variant="h6" style={{ textAlign: 'left', marginTop: '20px', marginBottom: '10px' }}>
-                  Because you liked {favTitle}, here's something similar:
-                </Typography>
-                <Carousel recommendations={recommendations[favTitle]} />
-              </div>
-            )
-          ))
+          Object.keys(recommendations).map((favTitle) => {
+            const firstItem = recommendations[favTitle][0]; // Get the first item to determine type
+            const itemType = firstItem?.contentType ? firstItem.contentType : 'item'; // Fallback to 'item' if type is missing
+  
+            return (
+              recommendations[favTitle].length > 0 && (
+                <div key={favTitle} style={{ marginBottom: '40px' }}>
+                  <Typography variant="h6" style={{ textAlign: 'left', marginTop: '20px', marginBottom: '10px' }}>
+                    Because you liked the {itemType} {favTitle}, here's something similar:
+                  </Typography>
+                  <Carousel recommendations={recommendations[favTitle]} />
+                </div>
+              )
+            );
+          })
         )}
-
+  
         {/* Error Message */}
         {error && (
           <Typography style={{ textAlign: 'center', margin: '20px' }}>
@@ -92,7 +97,7 @@ export function ForYou() {
       </Container>
       <Footer />
     </>
-  );
+  );  
 }
 
 export default ForYou;

@@ -170,13 +170,6 @@ function UserProfile() {
                     onChange={(e) => setUserData({ ...userData, bio: e.target.value })}
                     margin="normal"
                   />
-                  <TextField
-                    fullWidth
-                    label="Avatar URL"
-                    value={userData.avatar_url || ''}
-                    onChange={(e) => setUserData({ ...userData, avatar_url: e.target.value })}
-                    margin="normal"
-                  />
                   <Button
                     variant="contained"
                     color="primary"
