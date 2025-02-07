@@ -4,7 +4,6 @@ import numpy as np
 import logging
 import os
 import pickle
-
 import nltk
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
@@ -12,7 +11,6 @@ from nltk import pos_tag
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, precision_score, recall_score, f1_score, accuracy_score
-
 from sentence_transformers import SentenceTransformer
 
 # Ensure NLTK data is downloaded
@@ -41,8 +39,8 @@ if not os.path.exists(CACHE_DIR):
 
 def load_datasets():
     # Load and combine books and movies data
-    df_books = pd.read_csv('src/datasets/content_based/popular_books.csv')
-    df_movies = pd.read_csv('src/datasets/content_based/popular_movies.csv')
+    df_books = pd.read_csv('src/datasets/popular_books.csv')
+    df_movies = pd.read_csv('src/datasets/popular_movies.csv')
     df_books['type'] = 'book'
     df_movies['type'] = 'movie'
     df_combined = pd.concat([df_books, df_movies], ignore_index=True)
