@@ -2,7 +2,6 @@ import asyncio
 import aiohttp
 import pandas as pd
 import numpy as np
-import random
 import logging
 from tqdm import tqdm
 from scipy.stats import truncnorm
@@ -11,49 +10,86 @@ from scipy.stats import truncnorm
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-CATEGORIES = ["juvenile-fiction", "fantasy", "science-fiction", "adventure", "thriller"]
+CATEGORIES = [
+    "Juvenile Fiction",
+    "Fantasy",
+    "Science Fiction",
+    "Adventure",
+    "Thriller",
+    "Romance",
+    "Mystery",
+    "Horror",
+    "Biography",
+    "History",
+    "Poetry",
+    "Classics",
+    "Children's Literature",
+    "Young Adult",
+    "Nonfiction",
+    "Science",
+    "Self-Help",
+    "Cooking",
+    "Art",
+    "Travel",
+    "Sports",
+    "Comics",
+    "Graphic Novels",
+    "Manga",
+    "Music",
+    "Religion",
+    "Philosophy",
+    "Psychology",
+    "Business",
+    "Economics",
+    "Technology",
+    "Crafts",
+    "Hobbies",
+    "Health",
+]
+
 BASE_SEARCH_URL = "https://openlibrary.org/search.json"
 BASE_WORKS_URL = "https://openlibrary.org"
-GENERIC_QUERY = "bestseller"
 
 MAX_RESULTS = 100
-BATCH_SIZE = 1000
+BATCH_SIZE = 100
 CONCURRENCY = 5
 
 # Set up distributions for ratings
-# Vote Average: truncated normal between [1,5], mean=3.7, std=0.5
+# Vote Average: truncated normal between [1,5] (mean=3.7, std=0.5)
 rating_mean = 3.7
 rating_std = 0.5
 lower, upper = 1, 5
 a, b = (lower - rating_mean) / rating_std, (upper - rating_mean) / rating_std
 rating_dist = truncnorm(a, b, loc=rating_mean, scale=rating_std)
 
-# Vote Count: lognormal distribution
-# median ~20, wide variance
-log_mean = np.log(20)  # median around 20
+# Vote Count: lognormal distribution (median around 20)
+log_mean = np.log(20)
 log_sigma = 1.0
 def generate_vote_count():
     count = int(np.random.lognormal(mean=log_mean, sigma=log_sigma))
-    # Ensure at least 1 rating
     return max(count, 1)
 
 async def fetch_url(session, url):
-    retries = 3
+    max_retries = 3
     backoff = 1.0
-    for attempt in range(retries):
+    for attempt in range(max_retries):
         try:
             async with session.get(url) as resp:
                 if resp.status == 200:
                     return await resp.json()
                 else:
-                    logger.info(f"Non-200 response ({resp.status}) from {url}, retrying in {backoff}s...")
+                    logger.info(
+                        f"Non-200 response ({resp.status}) from {url}, retrying in {backoff:.1f}s (attempt {attempt+1}/{max_retries})..."
+                    )
                     await asyncio.sleep(backoff)
-                    backoff *= 2
+                    backoff *= 2  # exponential backoff
         except aiohttp.ClientError as e:
-            logger.info(f"Client error: {e}. Retrying in {backoff}s...")
+            logger.info(
+                f"Client error: {e}. Retrying in {backoff:.1f}s (attempt {attempt+1}/{max_retries})..."
+            )
             await asyncio.sleep(backoff)
             backoff *= 2
-    logger.info(f"Failed to fetch {url} after {retries} retries.")
+    logger.info(f"Failed to fetch {url} after {max_retries} retries.")
     return None
 
 async def fetch_plot(session, work_key):
@@ -64,7 +100,6 @@ async def fetch_plot(session, work_key):
     data = await fetch_url(session, url)
     if data is None:
         return None
-
     desc = data.get('description')
     if isinstance(desc, dict):
         return desc.get('value')
@@ -74,7 +109,7 @@ async def fetch_plot(session, work_key):
 
 async def parse_book_item(session, doc):
     """
-    Parse a single doc and fetch the plot concurrently.
+    Parse a single document from the search results and fetch its plot.
     """
     book_id = doc.get('key')
     title = doc.get('title')
@@ -87,25 +122,22 @@ async def parse_book_item(session, doc):
     subjects = doc.get('subject', [])
     genres_str = ', '.join(subjects) if subjects else None
 
-    # Generate statistically grounded Vote Average and Vote Count
     vote_average = rating_dist.rvs()
-    vote_average = round(vote_average, 1)  # Round to one decimal
+    vote_average = round(vote_average, 1)
     vote_count = generate_vote_count()
 
-    # Release date
     release_date = None
     if 'first_publish_year' in doc:
         release_date = str(doc['first_publish_year'])
     elif 'publish_date' in doc and doc['publish_date']:
         release_date = doc['publish_date'][0]
 
-    cover_id = doc.get('cover_i')
-    large_cover_url = f"http://covers.openlibrary.org/b/id/{cover_id}-L.jpg" if cover_id else None
-
-    # Fetch the plot
     plot = await fetch_plot(session, book_id)
     if plot is None:
         logger.info(f"No plot found for {book_id} (Title: {title}).")
+
+    # Build the book page link (instead of an image cover)
+    book_link = f"{BASE_WORKS_URL}{book_id}"
 
     book_data = {
         'ID': book_id,
@@ -116,39 +148,33 @@ async def parse_book_item(session, doc):
         'Vote Average': vote_average,
         'Vote Count': vote_count,
         'Release Date': release_date,
-        'Large Cover URL': large_cover_url
+        'Book Link': book_link
     }
     return book_data
 
 async def async_fetch_books(query, total_needed=100, fetched_ids=None, subject_mode=False):
     """
-    Fetch books from Open Library. If subject_mode=True, treat 'query' as a subject.
-    Otherwise, treat it as a general search query.
+    Fetch books from Open Library using the given subject query.
     """
     if fetched_ids is None:
         fetched_ids = set()
 
     books_data = []
     pages = (total_needed // MAX_RESULTS) + (1 if total_needed % MAX_RESULTS else 0)
-    
+
     async with aiohttp.ClientSession() as session:
         pbar = tqdm(total=total_needed, desc=f"Fetching {query}", unit='book')
         try:
             start_page = 0
-
             while len(books_data) < total_needed and start_page < pages:
                 end_page = min(start_page + CONCURRENCY, pages)
                 tasks = []
                 for page_i in range(start_page, end_page):
                     offset = page_i * MAX_RESULTS
-                    if subject_mode:
-                        url = f"{BASE_SEARCH_URL}?subject={query}&limit={MAX_RESULTS}&offset={offset}"
-                    else:
-                        url = f"{BASE_SEARCH_URL}?q={query}&limit={MAX_RESULTS}&offset={offset}"
+                    # Using the category as subject
+                    url = f"{BASE_SEARCH_URL}?subject={query}&limit={MAX_RESULTS}&offset={offset}"
                     tasks.append(fetch_url(session, url))
-
                 results = await asyncio.gather(*tasks)
-
                 any_items_found = False
                 for data in results:
                     if data is None:
@@ -157,11 +183,8 @@ async def async_fetch_books(query, total_needed=100, fetched_ids=None, subject_m
                     if not docs:
                         continue
                     any_items_found = True
-
-                    # Parse all docs in parallel
                     parse_tasks = [parse_book_item(session, doc) for doc in docs if doc.get('key') not in fetched_ids]
                     parsed_results = await asyncio.gather(*parse_tasks)
-                    
                     for res in parsed_results:
                         if res and res['ID'] not in fetched_ids:
                             fetched_ids.add(res['ID'])
@@ -171,71 +194,46 @@ async def async_fetch_books(query, total_needed=100, fetched_ids=None, subject_m
                                 break
                     if len(books_data) >= total_needed:
                         break
-
                 if not any_items_found:
                     break
-
                 start_page = end_page
                 await asyncio.sleep(0.1)
         finally:
             pbar.close()
-
     return books_data, fetched_ids
 
 async def async_fetch_books_by_categories(categories, total_books=500, fetched_ids=None):
     if fetched_ids is None:
         fetched_ids = set()
-
     books_data = []
     books_per_category = total_books // len(categories)
     remainder = total_books % len(categories)
 
-    logger.info("Fetching books from prioritized categories...")
+    logger.info("Fetching books by categories...")
     for i, category in enumerate(categories):
         need = books_per_category + (1 if i < remainder else 0)
         logger.info(f" - Fetching {need} books from category: {category}")
         category_books, fetched_ids = await async_fetch_books(category, total_needed=need, fetched_ids=fetched_ids, subject_mode=True)
         books_data.extend(category_books)
-
     return books_data[:total_books], fetched_ids
-
-async def async_fetch_popular_books_by_relevance(total_books=500, query=GENERIC_QUERY, fetched_ids=None):
-    logger.info(f"Fetching {total_books} books by relevance for query '{query}'...")
-    books, fetched_ids = await async_fetch_books(query, total_needed=total_books, fetched_ids=fetched_ids, subject_mode=False)
-    return books, fetched_ids
 
 def save_to_csv(data, filename='popular_books.csv'):
     df = pd.DataFrame(data)
-    # Remove items without Plot and drop 'ID' column
+    initial_count = len(df)
     df = df.dropna(subset=['Plot'])
+    dropped_count = initial_count - len(df)
+    if dropped_count > 0:
+        logger.info(f"Deleted {dropped_count} books due to missing plot section.")
     if 'ID' in df.columns:
         df = df.drop(columns=['ID'])
     df.to_csv(filename, index=False)
     logger.info(f"Saved {len(df)} books to {filename}")
 
-async def main(total_books=10000):
-    half = total_books // 2
-
-    all_books = []
+async def main(total_books=1000):
     fetched_ids = set()
-
-    # Fetch from categories
-    category_books, fetched_ids = await async_fetch_books_by_categories(CATEGORIES, total_books=half, fetched_ids=fetched_ids)
-    all_books.extend(category_books)
-
-    # Save intermediate results if large amount fetched
-    if len(all_books) >= BATCH_SIZE:
-        save_to_csv(all_books, filename='partial_categories_books.csv')
-
-    # Fetch by a general query
-    relevance_books, fetched_ids = await async_fetch_popular_books_by_relevance(total_books=half, query=GENERIC_QUERY, fetched_ids=fetched_ids)
-    all_books.extend(relevance_books)
-
-    # Trim to total if needed
-    all_books = all_books[:total_books]
-
-    # Final save
-    save_to_csv(all_books, filename='popular_books.csv')
+    # Fetch books only by categories
+    category_books, fetched_ids = await async_fetch_books_by_categories(CATEGORIES, total_books=total_books, fetched_ids=fetched_ids)
+    save_to_csv(category_books, filename='popular_books.csv')
 
 if __name__ == "__main__":
-    asyncio.run(main(total_books=10000))
+    asyncio.run(main(total_books=1000))

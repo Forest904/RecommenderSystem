@@ -18,7 +18,7 @@ def make_request(url, retries=5):
     for attempt in range(retries):
         try:
             response = requests.get(url, headers=HEADERS)
-            print(f"[DEBUG] Request: {url} | Status: {response.status_code} | Attempt: {attempt+1}")
+            #print(f"[DEBUG] Request: {url} | Status: {response.status_code} | Attempt: {attempt+1}")
             if response.status_code == 200:
                 return response.json()
             elif response.status_code == 429:  # Rate limit
@@ -55,7 +55,7 @@ def get_large_cover_url(images):
             return f"https://image.tmdb.org/t/p/original{file_path}"
     return None
 
-def process_movies(total_movies=100000):
+def process_movies(total_movies=1000):
     """Fetch and process movie data efficiently."""
     movies_data = []
     total_pages = (total_movies // 20) + 1  
@@ -94,7 +94,9 @@ def process_movies(total_movies=100000):
         director = next((crew['name'] for crew in details.get('credits', {}).get('crew', [])
                          if crew['job'] == 'Director'), None)
         large_cover_url = get_large_cover_url(details.get('images', {}))
-
+        # Construct the movie link to the full TMDB page
+        movie_link = f"https://www.themoviedb.org/movie/{details.get('id')}"
+        
         movies_data.append({
             'Title': details.get('title', ''),
             'Director': director,
@@ -103,7 +105,8 @@ def process_movies(total_movies=100000):
             'Vote Average': details.get('vote_average', 0),
             'Vote Count': details.get('vote_count', 0),
             'Release Date': details.get('release_date', ''),
-            'Large Cover URL': large_cover_url
+            'Large Cover URL': large_cover_url,
+            'Movie Link': movie_link
         })
 
     return movies_data
