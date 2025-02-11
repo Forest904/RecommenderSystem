@@ -41,19 +41,12 @@ CATEGORIES = [
     "Mystery",
     "Horror",
     "Biography",
-    "History",
-    "Poetry",
     "Classics",
     "Children's Literature",
-    "Young Adult",
     "Nonfiction",
-    "Science",
-    "Travel",
     "Comics",
     "Manga",
-    "Philosophy",
     "Business",
-    "Economics",
     "Technology",
 ]
 
@@ -62,7 +55,7 @@ BASE_WORKS_URL = "https://openlibrary.org"
 
 MAX_RESULTS = 100
 CONCURRENCY = 5
-TOTAL_BOOKS = 20000  # For testing; change as needed
+TOTAL_BOOKS = 50000  # For testing; change as needed
 
 # Set up distributions for ratings
 rating_mean = 3.7
