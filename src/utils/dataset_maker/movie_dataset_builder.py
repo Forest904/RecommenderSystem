@@ -55,7 +55,7 @@ def get_large_cover_url(images):
             return f"https://image.tmdb.org/t/p/original{file_path}"
     return None
 
-def process_movies(total_movies=1000):
+def process_movies(total_movies=10000):
     """Fetch and process movie data efficiently."""
     movies_data = []
     total_pages = (total_movies // 20) + 1  
@@ -105,8 +105,8 @@ def process_movies(total_movies=1000):
             'Vote Average': details.get('vote_average', 0),
             'Vote Count': details.get('vote_count', 0),
             'Release Date': details.get('release_date', ''),
-            'Large Cover URL': large_cover_url,
-            'Movie Link': movie_link
+            'Movie Link': movie_link,
+            'Large Cover URL': large_cover_url            
         })
 
     return movies_data
