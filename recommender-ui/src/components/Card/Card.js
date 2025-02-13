@@ -22,10 +22,11 @@ const Card = ({
   isLiked,
   onLikeToggle,
   contentType,
+  link,
 }) => {
   // Ensure valid image URL
-  const imageUrl =
-    image && image.startsWith('http') ? image : '/placeholder-image.jpg';
+  const imageUrl = image;
+  const itemLink = link;
 
   const contentIcon =
     contentType === 'book' ? (
@@ -43,22 +44,34 @@ const Card = ({
         flexDirection: 'column',
       }}
     >
-      <CardMedia
-        component="img"
-        image={imageUrl}
-        alt={title || 'Placeholder title'}
-        style={{
-          flex: '1 1 auto',
-          width: '100%',
-          height: '100%',
-          objectFit: 'contain', // ensures the entire image is visible vertically
-        }}
-        onError={(e) => {
-          console.error("Image failed to load:", e.target.src);
-          e.target.onerror = null; // Prevents infinite loop if the placeholder fails
-          e.target.src = '/placeholder-image.jpg';
-        }}
-      />
+      {itemLink ? (
+        <a href={itemLink} target="_blank" rel="noopener noreferrer">
+          <CardMedia
+            component="img"
+            image={imageUrl}
+            alt={title || 'Placeholder title'}
+            style={{
+              flex: '1 1 auto',
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+            }}
+          />
+        </a>
+      ) : (
+        <CardMedia
+          component="img"
+          image={imageUrl}
+          alt={title || 'Placeholder title'}
+          style={{
+            flex: '1 1 auto',
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+          }}
+        />
+      )}
+
       <CardContent
         style={{
           flex: '0 0 auto',

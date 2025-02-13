@@ -42,6 +42,7 @@ export function ForYou() {
         const recommendationsMap = {};
         await Promise.all(selectedFavorites.map(async (fav) => {
           const response = await axios.post('http://localhost:5000/recommendations', { titles: [fav.title] });
+          console.log(response.data[0])
           console.log("Recommendations Response for", fav.title, ":", response.data); // Debugging log
           recommendationsMap[fav.title] = response.data.map(item => ({ ...item, contentType: item.type })).sort(() => Math.random() - 0.5); // Shuffle items in each carousel
         }));

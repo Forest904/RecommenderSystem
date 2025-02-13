@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS movies (
     vote_average REAL,
     vote_count INTEGER,
     release_date DATE,
+    movie_link TEXT,
     large_cover_url TEXT
 );
 
@@ -50,6 +51,7 @@ CREATE TABLE IF NOT EXISTS books (
     vote_average REAL,
     vote_count INTEGER,
     release_date INTEGER,
+    movie_link TEXT,
     large_cover_url TEXT
 );
 

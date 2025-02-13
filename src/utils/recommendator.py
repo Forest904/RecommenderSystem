@@ -44,7 +44,7 @@ def load_datasets():
     df_books['type'] = 'book'
     df_movies['type'] = 'movie'
     df_combined = pd.concat([df_books, df_movies], ignore_index=True)
-    df_combined = df_combined[['title', 'author', 'plot', 'genres', 'vote_average', 'vote_count', 'release_date', 'type', 'large_cover_url']]
+    df_combined = df_combined[['title', 'author', 'plot', 'genres', 'vote_average', 'vote_count', 'release_date', 'type', 'large_cover_url', 'link']]
     return df_combined
 
 def get_wordnet_pos(word):

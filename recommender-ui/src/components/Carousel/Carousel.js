@@ -78,8 +78,8 @@ const Carousel = ({ recommendations = [] }) => {
       </style>
       <Slider {...settings}>
         {recommendations.map(
-          ({ title, large_cover_url, type }, index) => (
-            <Card key={index} title={title} image={large_cover_url} contentType={type} />
+          ({ title, large_cover_url, type, link }, index) => (
+            <Card key={index} title={title} image={large_cover_url} contentType={type} link={link} />
           )
         )}
       </Slider>
