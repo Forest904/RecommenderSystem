@@ -31,6 +31,7 @@ const FavoritesPage = () => {
       fetch(`http://localhost:5000/favorites?user_id=${userId}`)
         .then((res) => res.json())
         .then((data) => {
+          console.log('Favorites:', data);
           setFavorites(data);
         })
         .catch((err) => console.error('Fetch Favorites Error:', err));
@@ -83,6 +84,7 @@ const FavoritesPage = () => {
                       title={item.title} 
                       image={item.large_cover_url} 
                       contentId={item.id}
+                      link={item.link}
                       userId={userId}
                       isLiked={true}
                       onLikeToggle={() => handleUnlike(item.id)}
@@ -100,6 +102,7 @@ const FavoritesPage = () => {
                       title={item.title} 
                       image={item.large_cover_url} 
                       contentId={item.id}
+                      link={item.link}
                       userId={userId}
                       isLiked={true}
                       onLikeToggle={() => handleUnlike(item.id)}

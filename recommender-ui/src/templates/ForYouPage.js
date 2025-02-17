@@ -23,7 +23,6 @@ export function ForYou() {
     const fetchFavorites = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/favorites?user_id=${userId}`);
-        console.log("Favorites Response:", response.data); // Debugging log
         setFavorites(response.data);
       } catch (err) {
         setError(err.response?.data?.error || 'An error occurred while fetching favorites.');
@@ -38,13 +37,13 @@ export function ForYou() {
       if (favorites.length === 0) return;
       
       try {
-        const selectedFavorites = favorites.sort(() => Math.random() - 0.5).slice(0, 10); // Take at most 10 random favorites
+        const selectedFavorites = favorites.sort(() => Math.random() - 0.5).slice(0, 10);
         const recommendationsMap = {};
         await Promise.all(selectedFavorites.map(async (fav) => {
           const response = await axios.post('http://localhost:5000/recommendations', { titles: [fav.title] });
-          console.log(response.data[0])
-          console.log("Recommendations Response for", fav.title, ":", response.data); // Debugging log
-          recommendationsMap[fav.title] = response.data.map(item => ({ ...item, contentType: item.type })).sort(() => Math.random() - 0.5); // Shuffle items in each carousel
+          recommendationsMap[fav.title] = response.data
+            .map(item => ({ ...item, contentType: item.type }))
+            .sort(() => Math.random() - 0.5);
         }));
         setRecommendations(recommendationsMap);
       } catch (err) {
@@ -58,7 +57,7 @@ export function ForYou() {
   return (
     <>
       <Header title="For You" />
-      <Container>
+      <Container style={{ paddingBottom: '100px' }}>
         <Typography variant="h4" style={{ marginTop: '20px', marginBottom: '40px' }}>
           Personalized Recommendations Based on Your Favorites
         </Typography>
@@ -73,8 +72,8 @@ export function ForYou() {
           </div>
         ) : (
           Object.keys(recommendations).map((favTitle) => {
-            const firstItem = recommendations[favTitle][0]; // Get the first item to determine type
-            const itemType = firstItem?.contentType ? firstItem.contentType : 'item'; // Fallback to 'item' if type is missing
+            const firstItem = recommendations[favTitle][0];
+            const itemType = firstItem?.contentType ? firstItem.contentType : 'item';
   
             return (
               recommendations[favTitle].length > 0 && (

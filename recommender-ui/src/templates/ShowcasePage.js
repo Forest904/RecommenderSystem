@@ -119,6 +119,7 @@ const ShowcasePage = () => {
                       title={item.title} 
                       image={item.large_cover_url} 
                       contentId={item.id}
+                      link={item.link}
                       userId={userId}
                       isLiked={favorites.includes(item.id)}
                       onLikeToggle={() => handleLikeToggle(item.id)}
@@ -145,6 +146,7 @@ const ShowcasePage = () => {
                       title={item.title} 
                       image={item.large_cover_url} 
                       contentId={item.id}
+                      link={item.link}
                       userId={userId}
                       isLiked={favorites.includes(item.id)}
                       onLikeToggle={() => handleLikeToggle(item.id)}

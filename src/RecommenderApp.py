@@ -42,15 +42,6 @@ def manage_account():
 def update_profile():
     return UserService.update_profile_details()
 
-# Library management endpoints
-@app.route('/library', methods=['GET', 'POST', 'DELETE'])
-def manage_library():
-    if request.method == 'GET':
-        return user_service.get_user_library()
-    elif request.method == 'POST':
-        return user_service.add_to_library()
-    elif request.method == 'DELETE':
-        return user_service.delete_from_library()
     
 # Content fetching endpoint
 @app.route('/content', methods=['GET'])

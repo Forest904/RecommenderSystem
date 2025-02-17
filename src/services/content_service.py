@@ -30,8 +30,8 @@ class ContentService:
             # If a specific content type is requested, run only that query.
             if content_type.lower() == 'movie':
                 query = f"""
-                    SELECT id, title, 'Movie' AS type, author, genres, plot, vote_average, vote_count, 
-                        release_date, large_cover_url 
+                    SELECT id, title, 'Movie' AS type, author, genres, plot, vote_average, vote_count,
+                        release_date, large_cover_url , link 
                     FROM movies 
                     WHERE {filter_clause}
                     ORDER BY {sort_column} {order_clause}
@@ -44,7 +44,7 @@ class ContentService:
             elif content_type.lower() == 'book':
                 query = f"""
                     SELECT id, title, 'Book' AS type, author, genres, plot, vote_average, vote_count, 
-                        release_date, large_cover_url 
+                        release_date, large_cover_url , link
                     FROM books 
                     WHERE {filter_clause}
                     ORDER BY {sort_column} {order_clause}
@@ -58,7 +58,7 @@ class ContentService:
                 # When no content_type is provided, get balanced results from both tables.
                 query_movies = f"""
                     SELECT id, title, 'Movie' AS type, author, genres, plot, vote_average, vote_count, 
-                        release_date, large_cover_url 
+                        release_date, large_cover_url , link
                     FROM movies 
                     WHERE {filter_clause}
                     ORDER BY {sort_column} {order_clause}
@@ -66,7 +66,7 @@ class ContentService:
                 """
                 query_books = f"""
                     SELECT id, title, 'Book' AS type, author, genres, plot, vote_average, vote_count, 
-                        release_date, large_cover_url 
+                        release_date, large_cover_url , link
                     FROM books 
                     WHERE {filter_clause}
                     ORDER BY {sort_column} {order_clause}

@@ -55,4 +55,3 @@ CREATE TABLE IF NOT EXISTS books (
     large_cover_url TEXT
 );
 
-

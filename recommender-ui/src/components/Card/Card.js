@@ -51,9 +51,8 @@ const Card = ({
             image={imageUrl}
             alt={title || 'Placeholder title'}
             style={{
-              flex: '1 1 auto',
               width: '100%',
-              height: '100%',
+              height: '180px',
               objectFit: 'contain',
             }}
           />
@@ -64,9 +63,8 @@ const Card = ({
           image={imageUrl}
           alt={title || 'Placeholder title'}
           style={{
-            flex: '1 1 auto',
             width: '100%',
-            height: '100%',
+            height: '180px',
             objectFit: 'contain',
           }}
         />
@@ -74,7 +72,7 @@ const Card = ({
 
       <CardContent
         style={{
-          flex: '0 0 auto',
+          flex: '1',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',

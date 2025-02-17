@@ -159,30 +159,6 @@ class UserService:
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
-
-
-    @staticmethod
-    def get_user_library():
-        try:
-            user_id = request.args.get("user_id")
-            if not user_id:
-                return jsonify({"error": "User ID is required."}), 400
-
-            db = get_db()
-            library = db.execute(
-                """
-                SELECT c.id, c.title, c.type, c.large_cover_url
-                FROM user_library ul
-                JOIN contents c ON ul.content_id = c.id
-                WHERE ul.user_id = ?
-                """,
-                (user_id,),
-            ).fetchall()
-
-            return jsonify([dict(item) for item in library]), 200
-
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
         
     @staticmethod
     def get_user_favorites():
@@ -199,7 +175,7 @@ class UserService:
             # Fetch favorite movies
             favorite_movies = db.execute(
                 """
-                SELECT m.id, m.title, 'Movie' AS type, m.large_cover_url
+                SELECT m.id, m.title, 'Movie' AS type, m.large_cover_url, m.link
                 FROM user_favorites uf
                 JOIN movies m ON uf.content_id = m.id
                 WHERE uf.user_id = ?
@@ -210,7 +186,7 @@ class UserService:
             # Fetch favorite books
             favorite_books = db.execute(
                 """
-                SELECT b.id, b.title, 'Book' AS type, b.large_cover_url
+                SELECT b.id, b.title, 'Book' AS type, b.large_cover_url, b.link
                 FROM user_favorites uf
                 JOIN books b ON uf.content_id = b.id
                 WHERE uf.user_id = ?
