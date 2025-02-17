@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Typography, Button } from '@mui/material';
 import Carousel from '../components/Carousel/Carousel';
-import Header from '../components/Header/Header';
-import Footer from '../components/Footer/Footer';
 
 export function ForYou() {
   const [favorites, setFavorites] = useState([]);
@@ -56,7 +54,6 @@ export function ForYou() {
 
   return (
     <>
-      <Header title="For You" />
       <Container style={{ paddingBottom: '100px' }}>
         <Typography variant="h4" style={{ marginTop: '20px', marginBottom: '40px' }}>
           Personalized Recommendations Based on Your Favorites
@@ -95,7 +92,6 @@ export function ForYou() {
           </Typography>
         )}
       </Container>
-      <Footer />
     </>
   );  
 }

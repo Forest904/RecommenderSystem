@@ -12,8 +12,6 @@ import {
 } from '@mui/material';
 import { Add, Check } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header/Header';
-import Footer from '../components/Footer/Footer';
 
 function UserProfile() {
   const [userData, setUserData] = useState({
@@ -83,7 +81,6 @@ function UserProfile() {
 
   return (
     <>
-      <Header title="User Profile" />
       <Container>
         <Paper style={{ padding: '20px', marginTop: '20px' }}>
           <Typography variant="h4" gutterBottom>
@@ -183,7 +180,7 @@ function UserProfile() {
               )}
               <Button
                 variant="contained"
-                color="secondary"
+                color="primary"
                 fullWidth
                 onClick={handleLogout}
                 sx={{ marginTop: '20px' }}
@@ -194,7 +191,6 @@ function UserProfile() {
           )}
         </Paper>
       </Container>
-      <Footer />
     </>
   );
 }

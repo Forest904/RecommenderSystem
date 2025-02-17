@@ -5,11 +5,8 @@ import {
   Typography,
   Box,
   Button,
-  Divider
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header/Header';
-import Footer from '../components/Footer/Footer';
 import Card from '../components/Card/Card';
 
 const FavoritesPage = () => {
@@ -60,7 +57,6 @@ const FavoritesPage = () => {
 
   return (
     <>
-      <Header />
       <Container sx={{ minHeight: 'calc(100vh - 160px)', paddingBottom: '80px', display: 'flex', flexDirection: 'column' }}>
         <Typography variant="h4" gutterBottom sx={{ marginTop: 3, fontWeight: 'bold' }}>
           Your Favorite Movies & Books
@@ -113,11 +109,6 @@ const FavoritesPage = () => {
             </Grid>
           </Grid>
         )}
-        <Box sx={{ marginTop: 'auto', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-            <Footer />
-          </Box>
-        </Box>
       </Container>
     </>
   );

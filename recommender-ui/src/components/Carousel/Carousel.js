@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -8,6 +8,7 @@ import Card from '../Card/Card';
 import { IconButton } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { ThemeContext } from '../../ThemeContext';
 
 // Custom Previous Arrow Component
 const PrevArrow = ({ onClick }) => (
@@ -46,6 +47,8 @@ const NextArrow = ({ onClick }) => (
 );
 
 const Carousel = ({ recommendations = [] }) => {
+  const { darkMode } = useContext(ThemeContext);
+
   const settings = {
     dots: true,
     infinite: true,
@@ -54,7 +57,7 @@ const Carousel = ({ recommendations = [] }) => {
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
     slidesToShow: 6,
-    slidesToScroll: 3,
+    slidesToScroll: 2,
     responsive: [
       {
         breakpoint: 1024,
@@ -73,6 +76,14 @@ const Carousel = ({ recommendations = [] }) => {
         {`
           .slick-prev, .slick-next {
             display: none !important;
+          }
+          .slick-dots li button:before {
+            color: ${darkMode ? 'white' : 'black'} !important;
+            opacity: 0.75;
+          }
+          .slick-dots li.slick-active button:before {
+            color: ${darkMode ? 'white' : 'black'} !important;
+            opacity: 1;
           }
         `}
       </style>

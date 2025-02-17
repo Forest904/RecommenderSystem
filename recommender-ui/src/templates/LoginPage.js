@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Container, TextField, Button, Typography, Paper, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header/Header';
-import Footer from '../components/Footer/Footer';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -44,7 +42,7 @@ function LoginPage() {
 
   return (
     <>
-      <Header title={isLogin ? 'Login' : 'Create Account'} />
+      
       <Container>
         <Grid container spacing={3} justifyContent="center">
           <Grid item xs={12} sm={8} md={6}>
@@ -93,7 +91,6 @@ function LoginPage() {
           </Grid>
         </Grid>
       </Container>
-      <Footer />
     </>
   );
 }

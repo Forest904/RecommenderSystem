@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Grid, Container, Typography, Button, Box } from '@mui/material';
-import Header from '../components/Header/Header';
-import Footer from '../components/Footer/Footer';
 import Card from '../components/Card/Card';
 import SearchAndFilters from '../components/Search/SearchAndFilters';
 
@@ -76,7 +74,6 @@ const ShowcasePage = () => {
 
   return (
     <>
-      <Header />
       <Container
         sx={{
           minHeight: 'calc(100vh - 160px)',
@@ -168,7 +165,7 @@ const ShowcasePage = () => {
           ref={footerRef}
         >
           <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-            <Footer />
+            
           </Box>
           {footerInView && (
             <Box
