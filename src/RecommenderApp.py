@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 from database.db_handler import init_db
 from services.recommendations_service import RecommendationService
@@ -6,9 +6,20 @@ from services.content_service import ContentService
 from services.user_service import UserService
 from utils.error_handler import error_response
 from flask import request
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 CORS(app)
+
+# For serving the static files from the React app
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        # If the requested file is not found, serve index.html (for client-side routing)
+        return send_from_directory(app.static_folder, 'index.html')
 
 # Initialize service instances
 recommender_service = RecommendationService()
