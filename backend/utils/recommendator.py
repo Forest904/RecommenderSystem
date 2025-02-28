@@ -10,7 +10,6 @@ from nltk.stem import WordNetLemmatizer
 from nltk import pos_tag
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, precision_score, recall_score, f1_score, accuracy_score
 from sentence_transformers import SentenceTransformer
 
 # Ensure NLTK data is downloaded
@@ -74,6 +73,20 @@ def compute_similarity(X_train, X_test, embeddings):
     cosine_sim = cosine_similarity(test_emb, train_emb)
     return cosine_sim
 
+def get_recommendations(content_title, df_combined, embeddings, k=10):
+    # Recommend top-k similar items
+    try:
+        idx = df_combined[df_combined['title'] == content_title].index[0]
+    except IndexError:
+        logger.warning(f"'{content_title}' not found.")
+        return []
+    scores = cosine_similarity(embeddings[idx].reshape(1, -1), embeddings).flatten()
+    sorted_idx = np.argsort(-scores)
+    top_idx = sorted_idx[sorted_idx != idx][:k]
+    return df_combined.iloc[top_idx][['title', 'type']].to_dict(orient='records')
+
+'''
+
 def predict_ratings(cosine_sim, X_train, X_test, k=10):
     # Predict test ratings from top-k similar items in train
     train_ratings = X_train['vote_average'].values
@@ -111,17 +124,7 @@ def evaluate_model(actual, predicted, threshold=5):
     mse, rmse = evaluate_regression(actual, predicted)
     return acc, prec, recall, f1, mse, rmse
 
-def get_recommendations(content_title, df_combined, embeddings, k=10):
-    # Recommend top-k similar items
-    try:
-        idx = df_combined[df_combined['title'] == content_title].index[0]
-    except IndexError:
-        logger.warning(f"'{content_title}' not found.")
-        return []
-    scores = cosine_similarity(embeddings[idx].reshape(1, -1), embeddings).flatten()
-    sorted_idx = np.argsort(-scores)
-    top_idx = sorted_idx[sorted_idx != idx][:k]
-    return df_combined.iloc[top_idx][['title', 'type']].to_dict(orient='records')
+
 
 def run_recommendation_and_evaluate(content_title, df_combined, embeddings, X_train, X_test, cosine_sim, threshold=5):
     # Get recommendations, predict ratings, evaluate performance
@@ -138,6 +141,8 @@ def run_recommendation_and_evaluate(content_title, df_combined, embeddings, X_tr
     logger.info(f"  Mean Squared Error: {mse:.4f}")
     logger.info(f"  Root Mean Squared Error: {rmse:.4f}")
     return [acc, prec, recall, f1, mse, rmse]
+
+'''
 
 def initialize_recommender():
     """
@@ -200,4 +205,6 @@ if __name__ == "__main__":
     X_train, X_test = train_test_split(df_combined, test_size=0.2, random_state=42)
     cosine_sim_test_train = compute_similarity(X_train, X_test, embeddings)
     content_title = "Despicable Me 4"
-    run_recommendation_and_evaluate(content_title, df_combined, embeddings, X_train, X_test, cosine_sim_test_train, threshold=5)
+    recommendations = get_balanced_recommendations(content_title, 10)
+    print(recommendations)
+    #run_recommendation_and_evaluate(content_title, df_combined, embeddings, X_train, X_test, cosine_sim_test_train, threshold=5)

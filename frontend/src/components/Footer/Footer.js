@@ -20,7 +20,7 @@ const Footer = () => {
     >
       <Container maxWidth="lg" style={{ textAlign: "center" }}>
         <Typography variant="body2">
-          &copy; {new Date().getFullYear()} Yo MaMa. All rights reserved.
+          &copy; {new Date().getFullYear()}. All rights reserved.
         </Typography>
       </Container>
     </Box>

@@ -57,7 +57,7 @@ const Carousel = ({ recommendations = [] }) => {
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
     slidesToShow: 6,
-    slidesToScroll: 2,
+    slidesToScroll: 3,
     responsive: [
       {
         breakpoint: 1024,
