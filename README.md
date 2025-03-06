@@ -19,8 +19,8 @@ This project implements a cross-recommendation system designed to provide person
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/cross-recommendation-system.git
-cd cross-recommendation-system
+git clone https://github.com/Forest904/RecommenderSystem.git
+cd RecommenderSystem
 ```
 
 2. Create a virtual environment (recommended):
